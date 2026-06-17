@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대변실금 연구 CRF 입력 시스템</title>
+<style>
+:root{--bg:#f7f8fc;--sb:#1a2540;--sb-h:#243058;--sb-a:#2e7dff;--sb-tx:#a8b4cc;--wh:#fff;--pri:#2e7dff;--pri-d:#1a5fd4;--danger:#e53e3e;--success:#38a169;--border:#e2e8f0;--text:#1a202c;--muted:#718096;--lbl:#4a5568;--th:#1a2540;--stripe:#f8fafc;--font:'Pretendard','Noto Sans KR',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
+#sidebar{width:260px;min-width:260px;background:var(--sb);display:flex;flex-direction:column;height:100vh;overflow-y:auto;z-index:100}
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-thumb{background:#2e3d60;border-radius:2px}
+.sb-header{padding:20px 18px 14px;border-bottom:1px solid #2a3a5c}
+.sb-title{color:#fff;font-size:13px;font-weight:700;line-height:1.4}
+.sb-sub{color:#6b7fa8;font-size:11px;margin-top:4px}
+.sb-id{padding:10px 18px;background:#243058;border-bottom:1px solid #2a3a5c;display:flex;align-items:center;gap:8px}
+.sb-id label{color:#a8b4cc;font-size:11px;min-width:50px}
+.sb-id input{flex:1;background:#1a2540;border:1px solid #3a4d70;border-radius:5px;color:#fff;font-size:12px;padding:5px 8px;outline:none}
+.sb-id input:focus{border-color:var(--pri)}
+.sb-sec{color:#4a5f85;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:14px 18px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;color:var(--sb-tx);font-size:12.5px;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--sb-h);color:#d4dff0}
+.nav-item.active{background:rgba(46,125,255,.15);color:#fff;border-left-color:var(--sb-a)}
+.nav-item .ni{font-size:15px;width:18px;text-align:center}
+.sb-footer{margin-top:auto;padding:14px 18px;border-top:1px solid #2a3a5c;display:flex;flex-direction:column;gap:8px}
+.btn-sb{width:100%;padding:9px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-sb:hover{opacity:.85}
+.btn-save{background:var(--pri);color:#fff}
+.btn-excel{background:var(--success);color:#fff}
+.btn-mgr{background:#4a5568;color:#fff}
+.btn-clear{background:#718096;color:#fff}
+#main{flex:1;overflow-y:auto;padding:28px 36px;background:var(--bg)}
+#main::-webkit-scrollbar{width:6px}
+#main::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px}
+.sec-pg{display:none}
+.sec-pg.active{display:block}
+.sec-hd{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--border)}
+.sec-icon{font-size:26px}
+.sec-title{font-size:20px;font-weight:700}
+.sec-desc{font-size:13px;color:var(--muted);margin-top:3px}
+.card{background:var(--wh);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;overflow:hidden}
+.card-hd{background:#eef2ff;padding:12px 18px;font-size:13px;font-weight:700;color:#2d3748;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-bd{padding:18px}
+.frow{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:5px;flex:1;min-width:160px}
+.fg.full{flex:1 0 100%}
+.fg.half{flex:1 1 calc(50% - 8px)}
+.fg.third{flex:1 1 calc(33% - 11px)}
+label.fl{font-size:12px;font-weight:600;color:var(--lbl)}
+label.fl .req{color:var(--danger);margin-left:2px}
+input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{border:1px solid #d1d9e6;border-radius:6px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--wh);outline:none;transition:border-color .15s;font-family:var(--font);width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(46,125,255,.1)}
+textarea{resize:vertical;min-height:60px}
+input[type="number"]{-moz-appearance:textfield}
+input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}
+.unit{font-size:12px;color:var(--muted);margin-left:4px}
+.rg,.cg{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:2px}
+.rg label,.cg label{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text);cursor:pointer;font-weight:400}
+input[type="radio"],input[type="checkbox"]{width:15px;height:15px;accent-color:var(--pri);cursor:pointer}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px}
+.tbl th{background:var(--th);color:#fff;padding:9px 10px;text-align:center;font-weight:600;font-size:12px;border:1px solid #2a3a5c}
+.tbl td{padding:8px 10px;border:1px solid var(--border);text-align:center;vertical-align:middle}
+.tbl tr:nth-child(even) td{background:var(--stripe)}
+.tbl td:first-child{text-align:left;font-weight:500}
+.tbl input[type="text"],.tbl input[type="number"]{width:100%;min-width:60px;padding:5px 7px;font-size:12px}
+.tbl select{width:100%;min-width:70px;padding:5px 7px;font-size:12px}
+.ctbl{width:100%;border-collapse:collapse}
+.ctbl th{background:var(--th);color:#fff;padding:9px 14px;font-size:12px;border:1px solid #2a3a5c}
+.ctbl td{padding:9px 14px;border:1px solid var(--border);font-size:13px}
+.ctbl tr:nth-child(even) td{background:#f8fafc}
+.yn{display:flex;gap:18px;justify-content:center}
+.yn label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px}
+.sc-box{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
+.sc-item{display:flex;flex-direction:column;align-items:center;min-width:100px}
+.sc-label{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.sc-val{font-size:22px;font-weight:800;color:var(--pri);min-width:60px;text-align:center;background:#fff;border:2px solid var(--pri);border-radius:8px;padding:4px 10px}
+.si{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;margin-top:2px}
+.si-n{background:#dcfce7;color:#166534}
+.si-mi{background:#fef9c3;color:#854d0e}
+.si-mo{background:#fed7aa;color:#9a3412}
+.si-sv{background:#fee2e2;color:#991b1b}
+.abar{display:flex;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);justify-content:flex-end}
+.btn{padding:9px 18px;border-radius:7px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-pri{background:var(--pri);color:#fff}
+.btn-pri:hover{background:var(--pri-d)}
+.btn-suc{background:var(--success);color:#fff}
+.btn-suc:hover{background:#2f855a}
+.btn-out{background:transparent;color:var(--pri);border:1.5px solid var(--pri)}
+.btn-out:hover{background:var(--pri);color:#fff}
+#toast{position:fixed;bottom:30px;right:30px;background:#1a2540;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.mo-box{background:#fff;border-radius:12px;width:700px;max-width:96vw;max-height:85vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.mo-box h2{font-size:17px;font-weight:700;margin-bottom:18px}
+.mo-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);margin-top:-4px}
+.rec-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:8px}
+.rec-id{font-weight:700;color:var(--pri);min-width:120px}
+.rec-date{color:var(--muted);font-size:11px;flex:1}
+.rec-acts{display:flex;gap:6px}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:5px}
+.btn-dng{background:var(--danger);color:#fff}
+.diary-wrap{overflow-x:auto}
+.diary-tbl{min-width:900px}
+.diary-tbl th{font-size:11px}
+.diary-tbl td textarea{min-height:50px;font-size:11px}
+.day-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.day-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:12px;cursor:pointer;font-weight:500;color:var(--muted);transition:all .15s}
+.day-tab.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.day-panel{display:none}
+.day-panel.active{display:block}
+.dvd{border:none;border-top:1px dashed var(--border);margin:16px 0}
+.ffq-tbl{font-size:11px;min-width:900px}
+.ffq-tbl th{font-size:10px;padding:7px 5px}
+.ffq-tbl td{padding:5px}
+.ffq-tbl td input[type="number"]{width:55px}
+/* ===== 모드 전환기 ===== */
+.mode-switch{display:flex;gap:4px;padding:10px 14px;background:#243058;border-bottom:1px solid #2a3a5c}
+.ms-btn{flex:1;padding:7px 4px;border-radius:6px;border:1px solid #3a4d70;background:#1a2540;color:#a8b4cc;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:var(--font)}
+.ms-btn:hover{background:#2e3d60;color:#fff}
+.ms-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.view{display:none}
+.view.active{display:block}
+/* 필수 항목 미입력 표시 */
+.invalid input,.invalid select,.invalid textarea{border-color:var(--danger)!important}
+.invalid-msg{color:var(--danger);font-size:12px;margin-top:4px;display:none}
+.invalid .invalid-msg{display:block}
+.req-banner{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
+.req-banner.show{display:block}
+/* 비활성화 영역 */
+.disabled-block{opacity:.45;pointer-events:none;filter:grayscale(.3)}
+.cond-hint{font-size:11px;color:var(--muted);font-style:italic;margin-left:6px}
+/* 연동 배너 */
+.link-banner{background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7;border-radius:8px;padding:10px 14px;font-size:12.5px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.submit-bar{display:flex;gap:10px;margin-top:24px;padding-top:18px;border-top:2px solid var(--border);justify-content:flex-end;align-items:center}
+.submit-note{font-size:12px;color:var(--muted);margin-right:auto}
+/* ===== 데이터 시트 ===== */
+.sheet-tabs{display:flex;gap:6px;align-items:center;margin-bottom:14px;border-bottom:2px solid var(--border);padding-bottom:10px}
+.sheet-tab{padding:7px 16px;border-radius:7px 7px 0 0;border:1px solid var(--border);border-bottom:none;background:#f1f5f9;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.sheet-tab.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.sheet-wrap{overflow:auto;max-height:65vh;border:1px solid var(--border);border-radius:8px}
+.sheet-tbl{border-collapse:collapse;font-size:12px;white-space:nowrap;min-width:100%}
+.sheet-tbl th{position:sticky;top:0;background:var(--th);color:#fff;padding:8px 12px;border:1px solid #2a3a5c;text-align:left;z-index:2}
+.sheet-tbl th:first-child,.sheet-tbl td:first-child{position:sticky;left:0;z-index:1}
+.sheet-tbl th:first-child{z-index:3}
+.sheet-tbl td{padding:7px 12px;border:1px solid var(--border);background:#fff}
+.sheet-tbl tr:nth-child(even) td{background:#f8fafc}
+.sheet-tbl td:first-child{font-weight:700;color:var(--pri);background:#eef2ff!important}
+.sheet-tbl .col-date{color:#0d9488;font-weight:600}
+/* 작성정보 배너 (첫 페이지) */
+.meta-banner{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:18px;font-size:13px}
+.meta-item{display:flex;flex-direction:column;gap:2px}
+.meta-label{font-size:11px;color:var(--muted);font-weight:600}
+.meta-val{font-size:14px;font-weight:700;color:var(--text)}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.status-draft{background:#fef9c3;color:#854d0e}
+.status-final{background:#dcfce7;color:#166534}
+.search-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;font-size:13px}
+.search-row .sr-type{font-weight:700;padding:3px 10px;border-radius:12px;font-size:11px}
+.sr-init{background:#dbeafe;color:#1e40af}.sr-fu{background:#fce7f3;color:#9d174d}
+.amend-log{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px}
+.amend-log h4{font-size:12px;margin-bottom:6px;color:#854d0e}
+.amend-log .ae{padding:5px 0;border-top:1px dashed #fde68a}
+</style>
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sb-header"><div class="sb-title" id="sbTitle">대변실금 연구<br>CRF 입력 시스템</div><div class="sb-sub" id="sbSub">Fecal Incontinence Study</div></div>
+  <div class="mode-switch">
+    <button class="ms-btn active" id="ms-crf" onclick="switchMode('crf')">CRF</button>
+    <button class="ms-btn" id="ms-init" onclick="switchMode('init')">초진</button>
+    <button class="ms-btn" id="ms-fu" onclick="switchMode('fu')">재진</button>
+  </div>
+  <!-- CRF 식별자: 연구번호 + 등록번호(검색 연동용) -->
+  <div class="sb-idblock" id="idblock-crf">
+    <div class="sb-id"><label>연구번호</label><input type="text" id="studyId" placeholder="연구번호 입력"></div>
+    <div class="sb-id"><label>등록번호</label><input type="text" id="crf_regId" placeholder="등록번호 (연동용)" onchange="onCrfRegChange()"></div>
+    <div style="padding:0 18px 10px"><button class="btn-sb" style="background:#3a4d70;color:#fff" onclick="openSearch()">🔍 등록번호로 설문 검색·연동</button></div>
+  </div>
+  <!-- 초진/재진 식별자: 이름 + 등록번호 -->
+  <div class="sb-idblock" id="idblock-visit" style="display:none">
+    <div class="sb-id"><label>대상자 이름</label><input type="text" id="visitName" placeholder="이름 입력"></div>
+    <div class="sb-id"><label>등록번호</label><input type="text" id="subjectId" placeholder="등록번호 입력"></div>
+    <div style="padding:0 18px 10px;display:flex;flex-direction:column;gap:6px">
+      <button class="btn-sb" style="background:#2e7dff;color:#fff" onclick="startVisitEntry()">✍️ 입력 시작 (그냥 작성)</button>
+      <button class="btn-sb" style="background:#0d9488;color:#fff" onclick="pullFromCRF()">📥 CRF에서 공통항목 가져오기</button>
+      <button class="btn-sb" style="background:#3a4d70;color:#fff" onclick="linkVisitToCRF()">🔗 작성한 설문 → CRF로 연동</button>
+    </div>
+  </div>
+  <div class="nav-group" id="nav-crf-group">
+  <div class="sb-sec">기본 평가</div>
+  <div class="nav-item active" onclick="go('s0')" id="nav-s0"><span class="ni">📋</span> 선정/제외 기준</div>
+  <div class="nav-item" onclick="go('s1')" id="nav-s1"><span class="ni">🧍</span> 인구통계학적 특성</div>
+  <div class="nav-item" onclick="go('s2')" id="nav-s2"><span class="ni">💪</span> 일상생활 수행능력(ADL)</div>
+  <div class="nav-item" onclick="go('s3')" id="nav-s3"><span class="ni">🩺</span> 건강관련 설문</div>
+  <div class="sb-sec">대변실금 평가</div>
+  <div class="nav-item" onclick="go('s4')" id="nav-s4"><span class="ni">📊</span> FISI</div>
+  <div class="nav-item" onclick="go('s5')" id="nav-s5"><span class="ni">📊</span> Wexner Score</div>
+  <div class="nav-item" onclick="go('s6')" id="nav-s6"><span class="ni">🗒️</span> 배변습관 &amp; 추가정보</div>
+  <div class="nav-item" onclick="go('s7')" id="nav-s7"><span class="ni">💬</span> FIQOL 삶의 질</div>
+  <div class="sb-sec">인지/심리 평가</div>
+  <div class="nav-item" onclick="go('s8')" id="nav-s8"><span class="ni">🧠</span> 인지기능(MMSE-KC)</div>
+  <div class="nav-item" onclick="go('s9')" id="nav-s9"><span class="ni">😔</span> 우울(GDS-SF)</div>
+  <div class="nav-item" onclick="go('s10')" id="nav-s10"><span class="ni">🚶</span> 낙상효능척도(KFES-I)</div>
+  <div class="sb-sec">신체/활동 평가</div>
+  <div class="nav-item" onclick="go('s11')" id="nav-s11"><span class="ni">🏃</span> 신체활동(IPAQ)</div>
+  <div class="nav-item" onclick="go('s12')" id="nav-s12"><span class="ni">📏</span> 신체구성 &amp; 혈압</div>
+  <div class="nav-item" onclick="go('s13')" id="nav-s13"><span class="ni">⚡</span> 노쇠지표 &amp; MNA &amp; EQ-5D</div>
+  <div class="nav-item" onclick="go('s14')" id="nav-s14"><span class="ni">🏋️</span> 근골격계(DEXA/SPPB)</div>
+  <div class="nav-item" onclick="go('s15')" id="nav-s15"><span class="ni">💊</span> 항문괄약근 평가</div>
+  <div class="sb-sec">영양/다이어리</div>
+  <div class="nav-item" onclick="go('s16')" id="nav-s16"><span class="ni">📅</span> 7일 신체활동 기록</div>
+  <div class="nav-item" onclick="go('s17')" id="nav-s17"><span class="ni">🚽</span> 7일 배변일기</div>
+  <div class="nav-item" onclick="go('s18')" id="nav-s18"><span class="ni">🥗</span> 24시간 회상법</div>
+  <div class="nav-item" onclick="go('s19')" id="nav-s19"><span class="ni">🥦</span> 식품섭취빈도(FFQ)</div>
+  <div class="sb-sec">검체/완료</div>
+  <div class="nav-item" onclick="go('s20')" id="nav-s20"><span class="ni">🧫</span> 장내미생물 검체</div>
+  <div class="nav-item" onclick="go('s21')" id="nav-s21"><span class="ni">✅</span> 검사자 확인 &amp; 추적관리</div>
+  </div>
+  <div class="nav-group" id="nav-init-group" style="display:none">
+    <div class="sb-sec">초진 외래 설문</div>
+    <div class="nav-item active" onclick="goV('init','demo')" id="nav-init-demo"><span class="ni">🧍</span> 인구통계학적 특성</div>
+    <div class="nav-item" onclick="goV('init','health')" id="nav-init-health"><span class="ni">🩺</span> 건강관련 설문</div>
+    <div class="nav-item" onclick="goV('init','fisi')" id="nav-init-fisi"><span class="ni">📊</span> FISI</div>
+    <div class="nav-item" onclick="goV('init','wexner')" id="nav-init-wexner"><span class="ni">📊</span> Wexner Score</div>
+    <div class="nav-item" onclick="goV('init','habit')" id="nav-init-habit"><span class="ni">🗒️</span> 배변습관 &amp; 추가정보</div>
+    <div class="nav-item" onclick="goV('init','fiqol')" id="nav-init-fiqol"><span class="ni">💬</span> FIQOL 삶의 질</div>
+    <div class="nav-item" onclick="goV('init','hr')" id="nav-init-hr"><span class="ni">🥗</span> 24시간 회상법</div>
+  </div>
+  <div class="nav-group" id="nav-fu-group" style="display:none">
+    <div class="sb-sec">재진 외래 설문</div>
+    <div class="nav-item active" onclick="goV('fu','fisi')" id="nav-fu-fisi"><span class="ni">📊</span> FISI</div>
+    <div class="nav-item" onclick="goV('fu','wexner')" id="nav-fu-wexner"><span class="ni">📊</span> Wexner Score</div>
+    <div class="nav-item" onclick="goV('fu','habit')" id="nav-fu-habit"><span class="ni">🗒️</span> 배변습관 &amp; 추가정보</div>
+    <div class="nav-item" onclick="goV('fu','fiqol')" id="nav-fu-fiqol"><span class="ni">💬</span> FIQOL 삶의 질</div>
+    <div class="nav-item" onclick="goV('fu','hr')" id="nav-fu-hr"><span class="ni">🥗</span> 24시간 회상법</div>
+  </div>
+  <div class="sb-footer">
+    <button class="btn-sb btn-save" onclick="smartSave()">💾 저장</button>
+    <button class="btn-sb" id="btn-final" style="background:#1a5fd4;color:#fff;display:none" onclick="crfFinalSubmit()">✅ 최종 제출</button>
+    <button class="btn-sb btn-excel" onclick="smartExport()">📥 Excel 추출</button>
+    <button class="btn-sb" style="background:#0d9488;color:#fff" onclick="openSheet()">📑 데이터 시트 보기</button>
+    <button class="btn-sb btn-mgr" onclick="openMgr()">🗂️ 응답 관리</button>
+    <button class="btn-sb btn-clear" onclick="smartClear()">🔄 초기화</button>
+  </div>
+</nav>
+<main id="main">
+<div class="view view-crf active" id="view-crf">
+
+<!-- S0 선정/제외 기준 -->
+<div class="sec-pg active" id="s0">
+  <div class="sec-hd"><span class="sec-icon">📋</span><div><div class="sec-title">선정기준 및 제외기준</div><div class="sec-desc">모든 선정기준 '예', 모든 제외기준 '아니오'여야 연구 참여 가능합니다.</div></div></div>
+  <div class="meta-banner" id="crfMetaBanner"></div>
+  <div class="card"><div class="card-hd">✅ 선정기준 (모든 항목 '예' 여야 함)</div><div class="card-bd">
+    <table class="ctbl"><thead><tr><th style="text-align:left">선정기준 항목</th><th width="90">예</th><th width="90">아니오</th></tr></thead><tbody>
+      <tr><td>만 60세 이상</td><td class="yn"><label><input type="radio" name="inc1" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="inc1" value="아니오"> 아니오</label></td></tr>
+      <tr><td>독립적 보행 가능 (ADL 점수 &lt; 16점)</td><td class="yn"><label><input type="radio" name="inc2" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="inc2" value="아니오"> 아니오</label></td></tr>
+      <tr><td>최근 1개월 이내 항생제 또는 프로바이오틱스 복용력 없음</td><td class="yn"><label><input type="radio" name="inc3" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="inc3" value="아니오"> 아니오</label></td></tr>
+      <tr><td>대변실금 증상이 있는 자 (FISI 점수 ≥ 8)</td><td class="yn"><label><input type="radio" name="inc4" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="inc4" value="아니오"> 아니오</label></td></tr>
+      <tr><td>연구 참여에 자발적 동의</td><td class="yn"><label><input type="radio" name="inc5" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="inc5" value="아니오"> 아니오</label></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">🚫 제외기준 (모든 항목 '아니오' 여야 함)</div><div class="card-bd">
+    <table class="ctbl"><thead><tr><th style="text-align:left">제외기준 항목</th><th width="90">예</th><th width="90">아니오</th></tr></thead><tbody>
+      <tr><td>뇌졸중, 파킨슨병 등 중증 신경계 질환</td><td class="yn"><label><input type="radio" name="exc1" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="exc1" value="아니오"> 아니오</label></td></tr>
+      <tr><td>최근 3개월 이내 항문 또는 직장 수술력</td><td class="yn"><label><input type="radio" name="exc2" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="exc2" value="아니오"> 아니오</label></td></tr>
+      <tr><td>염증성 장질환(IBD), 과민성 장증후군(IBS) 진단</td><td class="yn"><label><input type="radio" name="exc3" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="exc3" value="아니오"> 아니오</label></td></tr>
+      <tr><td>진단받은 치매</td><td class="yn"><label><input type="radio" name="exc4" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="exc4" value="아니오"> 아니오</label></td></tr>
+      <tr><td>심혈관계 합병증으로 체력 측정 불가</td><td class="yn"><label><input type="radio" name="exc5" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="exc5" value="아니오"> 아니오</label></td></tr>
+      <tr><td>당뇨병성 신경병증 중증</td><td class="yn"><label><input type="radio" name="exc6" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="exc6" value="아니오"> 아니오</label></td></tr>
+      <tr><td>요양시설 입소자</td><td class="yn"><label><input type="radio" name="exc7" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="exc7" value="아니오"> 아니오</label></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">🔍 적격성 평가 결과</div><div class="card-bd">
+    <div id="eligRes" class="sc-box" style="justify-content:center;font-size:14px;font-weight:600;color:#718096">선정/제외기준을 모두 입력하면 결과가 표시됩니다.</div>
+  </div></div>
+  <div class="abar"><button class="btn btn-pri" onclick="go('s1')">다음 섹션 →</button></div>
+</div>
+
+<!-- S1 인구통계학적 -->
+<div class="sec-pg" id="s1">
+  <div class="sec-hd"><span class="sec-icon">🧍</span><div><div class="sec-title">인구통계학적 특성</div><div class="sec-desc">대상자의 기본 인적 정보를 입력하세요.</div></div></div>
+  <div class="card"><div class="card-hd">거주지</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg half"><label class="fl">시(도)</label><input type="text" id="demo_sido" placeholder="예: 서울특별시"></div>
+      <div class="fg half"><label class="fl">구(시, 군)</label><input type="text" id="demo_gu" placeholder="예: 동작구"></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">기본 정보</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">성별 <span class="req">*</span></label><div class="rg"><label><input type="radio" name="gender" value="남"> 남</label><label><input type="radio" name="gender" value="여"> 여</label></div></div>
+      <div class="fg third"><label class="fl">만 나이 <span class="req">*</span></label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="demo_age" placeholder="예: 72" min="0" max="120"><span class="unit">세</span></div></div>
+      <div class="fg third"><label class="fl">결혼 여부</label><div class="rg"><label><input type="radio" name="married" value="미혼"> 미혼</label><label><input type="radio" name="married" value="기혼"> 기혼</label></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label class="fl">함께 살고 계신 가족 (중복 선택 가능)</label>
+        <div class="cg">
+          <label><input type="checkbox" name="family" value="배우자·자녀"> 배우자·자녀</label>
+          <label><input type="checkbox" name="family" value="배우자"> 배우자</label>
+          <label><input type="checkbox" name="family" value="자녀"> 자녀</label>
+          <label><input type="checkbox" name="family" value="친인척"> 친인척</label>
+          <label><input type="checkbox" name="family" value="독거"> 독거</label>
+          <label><input type="checkbox" name="family_etc_chk" value="기타"> 기타: <input type="text" id="family_etc" style="width:100px;margin-left:4px"></label>
+        </div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">함께 사는 가족 수 (본인 제외)</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="family_cnt" placeholder="0" min="0"><span class="unit">명</span></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label class="fl">현재 배우자와의 관계</label>
+        <div class="rg" style="flex-direction:column;gap:6px">
+          <label><input type="radio" name="spouse" value="결혼/동거한 적 없음"> ① 결혼 혹은 동거한 적 없음</label>
+          <label><input type="radio" name="spouse" value="배우자 있음, 함께 거주"> ② 배우자가 있으며, 함께 살고 있음</label>
+          <label><input type="radio" name="spouse" value="배우자 있음, 별거"> ③ 배우자가 있으나, 함께 살고 있지 않음</label>
+          <label><input type="radio" name="spouse" value="사별"> ④ 사별로 인해 배우자와 함께 살고 있지 않음</label>
+          <label><input type="radio" name="spouse" value="이혼 등으로 배우자 없음"> ⑤ 이혼 등의 이유로 배우자가 없음</label>
+        </div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label class="fl">학력</label>
+        <div class="rg" style="flex-wrap:wrap;gap:8px">
+          <label><input type="radio" name="edu" value="학교 다닌 적 없음"> ① 학교를 다닌 적이 없음</label>
+          <label><input type="radio" name="edu" value="초등학교"> ② 초등학교</label>
+          <label><input type="radio" name="edu" value="중학교"> ③ 중학교</label>
+          <label><input type="radio" name="edu" value="고등학교"> ④ 고등학교</label>
+          <label><input type="radio" name="edu" value="전문대학"> ⑤ 전문대학</label>
+          <label><input type="radio" name="edu" value="대학교(4년제 이상)"> ⑥ 대학교(4년제 이상)</label>
+          <label><input type="radio" name="edu" value="대학원"> ⑦ 대학원</label>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s0')">← 이전</button><button class="btn btn-pri" onclick="go('s2')">다음 →</button></div>
+</div>
+
+<!-- S2 ADL -->
+<div class="sec-pg" id="s2">
+  <div class="sec-hd"><span class="sec-icon">💪</span><div><div class="sec-title">일상생활 수행능력 (ADL)</div><div class="sec-desc">각 항목에서 해당하는 점수를 선택하세요. (총 7~21점)</div></div></div>
+  <div class="card"><div class="card-hd">ADL 평가 항목</div><div class="card-bd">
+    <table class="tbl">
+      <thead><tr><th style="text-align:left">항목</th><th>1점 (독립)</th><th>2점 (부분 도움)</th><th>3점 (전적 의존)</th></tr></thead>
+      <tbody>
+        <tr><td>1. 옷 입기</td><td><label><input type="radio" name="adl1" value="1" onchange="calcADL()"> 1점</label></td><td><label><input type="radio" name="adl1" value="2" onchange="calcADL()"> 2점</label></td><td><label><input type="radio" name="adl1" value="3" onchange="calcADL()"> 3점</label></td></tr>
+        <tr><td>2. 세수하기</td><td><label><input type="radio" name="adl2" value="1" onchange="calcADL()"> 1점</label></td><td><label><input type="radio" name="adl2" value="2" onchange="calcADL()"> 2점</label></td><td><label><input type="radio" name="adl2" value="3" onchange="calcADL()"> 3점</label></td></tr>
+        <tr><td>3. 목욕하기</td><td><label><input type="radio" name="adl3" value="1" onchange="calcADL()"> 1점</label></td><td><label><input type="radio" name="adl3" value="2" onchange="calcADL()"> 2점</label></td><td><label><input type="radio" name="adl3" value="3" onchange="calcADL()"> 3점</label></td></tr>
+        <tr><td>4. 식사하기</td><td><label><input type="radio" name="adl4" value="1" onchange="calcADL()"> 1점</label></td><td><label><input type="radio" name="adl4" value="2" onchange="calcADL()"> 2점</label></td><td><label><input type="radio" name="adl4" value="3" onchange="calcADL()"> 3점</label></td></tr>
+        <tr><td>5. 이동하기</td><td><label><input type="radio" name="adl5" value="1" onchange="calcADL()"> 1점</label></td><td><label><input type="radio" name="adl5" value="2" onchange="calcADL()"> 2점</label></td><td><label><input type="radio" name="adl5" value="3" onchange="calcADL()"> 3점</label></td></tr>
+        <tr><td>6. 화장실 사용</td><td><label><input type="radio" name="adl6" value="1" onchange="calcADL()"> 1점</label></td><td><label><input type="radio" name="adl6" value="2" onchange="calcADL()"> 2점</label></td><td><label><input type="radio" name="adl6" value="3" onchange="calcADL()"> 3점</label></td></tr>
+        <tr><td>7. 대소변 조절</td><td><label><input type="radio" name="adl7" value="1" onchange="calcADL()"> 1점</label></td><td><label><input type="radio" name="adl7" value="2" onchange="calcADL()"> 2점</label></td><td><label><input type="radio" name="adl7" value="3" onchange="calcADL()"> 3점</label></td></tr>
+      </tbody>
+    </table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">ADL 총점</div><div class="sc-val" id="adlScore">-</div></div>
+      <div class="sc-item"><div class="sc-label">범위</div><div style="font-size:12px;color:#718096">7~21점</div></div>
+      <div id="adlInterp" style="font-size:13px;color:#718096;align-self:center"></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s1')">← 이전</button><button class="btn btn-pri" onclick="go('s3')">다음 →</button></div>
+</div>
+<!-- S3 건강관련 설문 -->
+<div class="sec-pg" id="s3">
+  <div class="sec-hd"><span class="sec-icon">🩺</span><div><div class="sec-title">건강관련 설문</div><div class="sec-desc">심혈관계 위험인자, 흡연, 낙상, 음주, 질환력, 약물 등을 입력하세요.</div></div></div>
+
+  <div class="card"><div class="card-hd">심혈관계 위험요인</div><div class="card-bd">
+    <table class="ctbl"><thead><tr><th style="text-align:left" width="75%">질문</th><th>예</th><th>아니오</th></tr></thead><tbody>
+      <tr><td>1. 남자 45세 이상, 여자 55세 이상이거나 폐경기</td><td class="yn"><label><input type="radio" name="cv1" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="cv1" value="아니오"> 아니오</label></td></tr>
+      <tr><td>2. 가족력: 직계 가족 중 심장마비/수술 (부·형제 55세 이전, 모·자매 65세 이전)</td><td class="yn"><label><input type="radio" name="cv2" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="cv2" value="아니오"> 아니오</label></td></tr>
+      <tr><td>6. 좌식생활: 최근 3개월 동안 30분 이상 중강도 운동을 주 5회 이상 하지 않음</td><td class="yn"><label><input type="radio" name="cv6" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="cv6" value="아니오"> 아니오</label></td></tr>
+      <tr><td>7. 비만(허리둘레): 남자 35인치 이상, 여자 31인치 이상</td><td class="yn"><label><input type="radio" name="cv7" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="cv7" value="아니오"> 아니오</label></td></tr>
+    </tbody></table>
+  </div></div>
+
+  <div class="card"><div class="card-hd">흡연</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg full"><label class="fl">3. 지금까지 피운 일반담배(궐련) 총량</label>
+        <div class="rg"><label><input type="radio" name="smoke_total" value="5갑 미만"> 5갑(100개비) 미만</label><label><input type="radio" name="smoke_total" value="5갑 이상"> 5갑(100개비) 이상</label><label><input type="radio" name="smoke_total" value="피운 적 없음"> 피운 적 없음</label></div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg half"><label class="fl">4. 처음 담배를 피운 시기</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="smoke_age" placeholder="나이" min="0" max="100" style="width:80px"><span class="unit">세</span></div></div>
+      <div class="fg half"><label class="fl">5. 현재 흡연 여부</label>
+        <div class="rg"><label><input type="radio" name="smoke_now" value="매일 피움"> 매일 피움</label><label><input type="radio" name="smoke_now" value="가끔 피움"> 가끔 피움</label><label><input type="radio" name="smoke_now" value="과거 흡연, 현재 비흡연"> 과거 흡연, 현재 안 피움</label></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">낙상 경험</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">지난 1년간 낙상 경험</label><div class="rg"><label><input type="radio" name="fall_exp" value="예"> 예</label><label><input type="radio" name="fall_exp" value="아니오"> 아니오</label></div></div>
+      <div class="fg third"><label class="fl">낙상 횟수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="fall_cnt" placeholder="0" min="0" style="width:80px"><span class="unit">회</span></div></div>
+      <div class="fg third"><label class="fl">낙상으로 인한 골절</label><div class="rg"><label><input type="radio" name="fall_fx" value="예"> 예</label><label><input type="radio" name="fall_fx" value="아니오"> 아니오</label></div></div>
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">음주</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg full"><label class="fl">지금까지 1잔 이상의 술을 마신 적이 있습니까?</label>
+        <div class="rg"><label><input type="radio" name="drink_exp" value="있음"> 있음</label><label><input type="radio" name="drink_exp" value="없음"> 없음</label></div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">한 달에 음주 횟수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="drink_monthly" placeholder="0" min="0" style="width:80px"><span class="unit">번</span></div></div>
+      <div class="fg third"><label class="fl">일주일에 음주 횟수</label>
+        <select id="drink_weekly"><option value="">선택</option><option>1번</option><option>2번</option><option>3번</option><option>4번</option><option>5번</option><option>6번</option><option>7번 이상</option></select>
+      </div>
+      <div class="fg third"><label class="fl">한 번에 음주량</label>
+        <select id="drink_amount"><option value="">선택</option><option>1-2잔</option><option>3-4잔</option><option>5-6잔</option><option>7-9잔</option><option>10잔 이상</option></select>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">항문/직장 수술력</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left">수술 종류</th><th>시행 연도</th></tr></thead><tbody>
+      <tr><td>치질 수술</td><td><input type="text" id="surg_hemorr" placeholder="예: 2019년"></td></tr>
+      <tr><td>항문 누공 수술</td><td><input type="text" id="surg_fistula" placeholder="년도"></td></tr>
+      <tr><td>항문 열상 수술</td><td><input type="text" id="surg_fissure" placeholder="년도"></td></tr>
+      <tr><td>직장 수술 (종류: <input type="text" id="surg_rectal_type" placeholder="직장 수술 종류" style="width:120px">)</td><td><input type="text" id="surg_rectal_yr" placeholder="년도"></td></tr>
+      <tr><td>기타 (종류: <input type="text" id="surg_etc_type" placeholder="기타 수술 종류" style="width:120px">)</td><td><input type="text" id="surg_etc_yr" placeholder="년도"></td></tr>
+    </tbody></table>
+  </div></div>
+
+  <div class="card"><div class="card-hd">과거력 / 현병력</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left">질환</th><th>진단 받은 적?</th><th>현재 치료 중?</th><th>진단 시기</th></tr></thead>
+    <tbody id="diagTb"></tbody></table>
+  </div></div>
+
+  <div class="card"><div class="card-hd">약물 복용</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">현재 규칙적으로 복용 중인 약</label><textarea id="med_current" placeholder="약 이름 입력. 해당사항 없으면 '없음'"></textarea></div></div>
+    <div class="frow"><div class="fg full"><label class="fl">오늘 아침 복용하신 약</label><textarea id="med_today" placeholder="오늘 복용한 약 이름. 해당사항 없으면 '없음'"></textarea></div></div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">완하제 종류</label><input type="text" id="laxative_type" placeholder="종류"></div>
+      <div class="fg third"><label class="fl">완하제 빈도</label><input type="text" id="laxative_freq" placeholder="예: 매일, 주 3회"></div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">지사제 종류</label><input type="text" id="antidiar_type" placeholder="종류"></div>
+      <div class="fg third"><label class="fl">지사제 빈도</label><input type="text" id="antidiar_freq" placeholder="예: 필요시"></div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">항문 관련 약물 종류</label><input type="text" id="anal_med_type" placeholder="종류"></div>
+      <div class="fg third"><label class="fl">항문 관련 약물 빈도</label><input type="text" id="anal_med_freq" placeholder="예: 1일 2회"></div>
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">폐경 및 산과력 (여성만 해당)</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">마지막 생리 후 1년 이상 경과 (폐경)</label><div class="rg"><label><input type="radio" name="menopause" value="예"> 예</label><label><input type="radio" name="menopause" value="아니오"> 아니오</label></div></div>
+      <div class="fg third"><label class="fl">폐경 나이</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="menopause_age" placeholder="" min="0" max="100" style="width:80px"><span class="unit">세</span></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">총 임신 횟수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="preg_total" placeholder="0" min="0" style="width:80px"><span class="unit">회</span></div></div>
+      <div class="fg third"><label class="fl">자연분만 횟수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="delivery_svd" placeholder="0" min="0" style="width:80px"><span class="unit">회</span></div></div>
+      <div class="fg third"><label class="fl">제왕절개 횟수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="delivery_cs" placeholder="0" min="0" style="width:80px"><span class="unit">회</span></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg half"><label class="fl">회음부 열상(3-4도) 경험</label><div class="rg"><label><input type="radio" name="perineal" value="예"> 예</label><label><input type="radio" name="perineal" value="아니오"> 아니오</label></div></div>
+      <div class="fg half"><label class="fl">질식 분만 시 기구 사용</label><div class="rg"><label><input type="radio" name="instrument" value="예"> 예</label><label><input type="radio" name="instrument" value="아니오"> 아니오</label></div></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s2')">← 이전</button><button class="btn btn-pri" onclick="go('s4')">다음 →</button></div>
+</div>
+
+<!-- S4 FISI -->
+<div class="sec-pg" id="s4">
+  <div class="sec-hd"><span class="sec-icon">📊</span><div><div class="sec-title">대변실금 평가 - FISI</div><div class="sec-desc">지난 한 달 동안의 실금 빈도를 입력하세요. (Fecal Incontinence Severity Index)</div></div></div>
+  <div class="card"><div class="card-hd">FISI 빈도 평가</div><div class="card-bd">
+    <table class="tbl">
+      <thead><tr>
+        <th style="text-align:left">대변 유형</th>
+        <th>하루 2회↑</th><th>하루 1회</th><th>주 2회↑</th><th>주 1회</th><th>월 1-3회</th><th>전혀 없음</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>가스</td>
+          <td><label><input type="radio" name="fisi_gas" value="12" onchange="calcFISI()"> 12</label></td>
+          <td><label><input type="radio" name="fisi_gas" value="11" onchange="calcFISI()"> 11</label></td>
+          <td><label><input type="radio" name="fisi_gas" value="8" onchange="calcFISI()"> 8</label></td>
+          <td><label><input type="radio" name="fisi_gas" value="6" onchange="calcFISI()"> 6</label></td>
+          <td><label><input type="radio" name="fisi_gas" value="4" onchange="calcFISI()"> 4</label></td>
+          <td><label><input type="radio" name="fisi_gas" value="0" onchange="calcFISI()"> 0</label></td>
+        </tr>
+        <tr><td>코같은 점액</td>
+          <td><label><input type="radio" name="fisi_mucus" value="12" onchange="calcFISI()"> 12</label></td>
+          <td><label><input type="radio" name="fisi_mucus" value="10" onchange="calcFISI()"> 10</label></td>
+          <td><label><input type="radio" name="fisi_mucus" value="7" onchange="calcFISI()"> 7</label></td>
+          <td><label><input type="radio" name="fisi_mucus" value="5" onchange="calcFISI()"> 5</label></td>
+          <td><label><input type="radio" name="fisi_mucus" value="3" onchange="calcFISI()"> 3</label></td>
+          <td><label><input type="radio" name="fisi_mucus" value="0" onchange="calcFISI()"> 0</label></td>
+        </tr>
+        <tr><td>설사변</td>
+          <td><label><input type="radio" name="fisi_loose" value="19" onchange="calcFISI()"> 19</label></td>
+          <td><label><input type="radio" name="fisi_loose" value="17" onchange="calcFISI()"> 17</label></td>
+          <td><label><input type="radio" name="fisi_loose" value="13" onchange="calcFISI()"> 13</label></td>
+          <td><label><input type="radio" name="fisi_loose" value="10" onchange="calcFISI()"> 10</label></td>
+          <td><label><input type="radio" name="fisi_loose" value="8" onchange="calcFISI()"> 8</label></td>
+          <td><label><input type="radio" name="fisi_loose" value="0" onchange="calcFISI()"> 0</label></td>
+        </tr>
+        <tr><td>고형변</td>
+          <td><label><input type="radio" name="fisi_solid" value="18" onchange="calcFISI()"> 18</label></td>
+          <td><label><input type="radio" name="fisi_solid" value="16" onchange="calcFISI()"> 16</label></td>
+          <td><label><input type="radio" name="fisi_solid" value="13" onchange="calcFISI()"> 13</label></td>
+          <td><label><input type="radio" name="fisi_solid" value="10" onchange="calcFISI()"> 10</label></td>
+          <td><label><input type="radio" name="fisi_solid" value="8" onchange="calcFISI()"> 8</label></td>
+          <td><label><input type="radio" name="fisi_solid" value="0" onchange="calcFISI()"> 0</label></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">FISI 총점</div><div class="sc-val" id="fisiScore">-</div></div>
+      <div class="sc-item"><div class="sc-label">범위</div><div style="font-size:12px;color:#718096">0~61점</div></div>
+      <div id="fisiInterp" style="font-size:13px;align-self:center"></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s3')">← 이전</button><button class="btn btn-pri" onclick="go('s5')">다음 →</button></div>
+</div>
+
+<!-- S5 Wexner -->
+<div class="sec-pg" id="s5">
+  <div class="sec-hd"><span class="sec-icon">📊</span><div><div class="sec-title">대변실금 평가 - Wexner Score</div><div class="sec-desc">각 항목의 빈도에 점수를 선택하세요. (0~20점)</div></div></div>
+  <div class="card"><div class="card-hd">Wexner Score 항목</div><div class="card-bd">
+    <table class="tbl">
+      <thead><tr>
+        <th style="text-align:left">항목</th>
+        <th>없음(0)</th><th>드물게&lt;월1회(1)</th><th>가끔 월1회~주1회미만(2)</th><th>자주 주1회~매일미만(3)</th><th>항상 매일이상(4)</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>고형변 실금</td><td><label><input type="radio" name="wex1" value="0" onchange="calcWexner()"> 0</label></td><td><label><input type="radio" name="wex1" value="1" onchange="calcWexner()"> 1</label></td><td><label><input type="radio" name="wex1" value="2" onchange="calcWexner()"> 2</label></td><td><label><input type="radio" name="wex1" value="3" onchange="calcWexner()"> 3</label></td><td><label><input type="radio" name="wex1" value="4" onchange="calcWexner()"> 4</label></td></tr>
+        <tr><td>액체변 실금</td><td><label><input type="radio" name="wex2" value="0" onchange="calcWexner()"> 0</label></td><td><label><input type="radio" name="wex2" value="1" onchange="calcWexner()"> 1</label></td><td><label><input type="radio" name="wex2" value="2" onchange="calcWexner()"> 2</label></td><td><label><input type="radio" name="wex2" value="3" onchange="calcWexner()"> 3</label></td><td><label><input type="radio" name="wex2" value="4" onchange="calcWexner()"> 4</label></td></tr>
+        <tr><td>가스 실금</td><td><label><input type="radio" name="wex3" value="0" onchange="calcWexner()"> 0</label></td><td><label><input type="radio" name="wex3" value="1" onchange="calcWexner()"> 1</label></td><td><label><input type="radio" name="wex3" value="2" onchange="calcWexner()"> 2</label></td><td><label><input type="radio" name="wex3" value="3" onchange="calcWexner()"> 3</label></td><td><label><input type="radio" name="wex3" value="4" onchange="calcWexner()"> 4</label></td></tr>
+        <tr><td>패드 착용</td><td><label><input type="radio" name="wex4" value="0" onchange="calcWexner()"> 0</label></td><td><label><input type="radio" name="wex4" value="1" onchange="calcWexner()"> 1</label></td><td><label><input type="radio" name="wex4" value="2" onchange="calcWexner()"> 2</label></td><td><label><input type="radio" name="wex4" value="3" onchange="calcWexner()"> 3</label></td><td><label><input type="radio" name="wex4" value="4" onchange="calcWexner()"> 4</label></td></tr>
+        <tr><td>생활 방해</td><td><label><input type="radio" name="wex5" value="0" onchange="calcWexner()"> 0</label></td><td><label><input type="radio" name="wex5" value="1" onchange="calcWexner()"> 1</label></td><td><label><input type="radio" name="wex5" value="2" onchange="calcWexner()"> 2</label></td><td><label><input type="radio" name="wex5" value="3" onchange="calcWexner()"> 3</label></td><td><label><input type="radio" name="wex5" value="4" onchange="calcWexner()"> 4</label></td></tr>
+      </tbody>
+    </table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">Wexner 총점</div><div class="sc-val" id="wexnerScore">-</div></div>
+      <div id="wexnerInterp" style="font-size:13px;align-self:center"></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s4')">← 이전</button><button class="btn btn-pri" onclick="go('s6')">다음 →</button></div>
+</div>
+
+<!-- S6 배변습관 -->
+<div class="sec-pg" id="s6">
+  <div class="sec-hd"><span class="sec-icon">🗒️</span><div><div class="sec-title">배변습관 &amp; 대변실금 추가 정보</div></div></div>
+  <div class="card"><div class="card-hd">배변습관</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg half"><label class="fl">평소 배변 빈도</label>
+        <div class="rg" style="flex-direction:column;gap:4px">
+          <label><input type="radio" name="bowel_freq" value="하루 3회 이상"> 하루 3회 이상</label>
+          <label><input type="radio" name="bowel_freq" value="하루 1-2회"> 하루 1-2회</label>
+          <label><input type="radio" name="bowel_freq" value="2일에 1회"> 2일에 1회</label>
+          <label><input type="radio" name="bowel_freq" value="3일에 1회"> 3일에 1회</label>
+          <label><input type="radio" name="bowel_freq" value="주 1-2회"> 주 1-2회</label>
+          <label><input type="radio" name="bowel_freq" value="주 1회 미만"> 주 1회 미만</label>
+        </div>
+      </div>
+      <div class="fg half"><label class="fl">평소 대변 굳기 (Bristol Stool Form Scale)</label>
+        <div class="rg" style="flex-direction:column;gap:4px">
+          <label><input type="radio" name="bristol" value="1형(단단한 덩어리)"> 1형 - 단단한 덩어리</label>
+          <label><input type="radio" name="bristol" value="2형(소시지, 딱딱함)"> 2형 - 소시지 모양이나 딱딱함</label>
+          <label><input type="radio" name="bristol" value="3형(소시지, 갈라짐)"> 3형 - 소시지 모양이나 갈라짐</label>
+          <label><input type="radio" name="bristol" value="4형(부드러운 소시지)"> 4형 - 부드러운 소시지</label>
+          <label><input type="radio" name="bristol" value="5형(부드러운 덩어리)"> 5형 - 부드러운 덩어리</label>
+          <label><input type="radio" name="bristol" value="6형(걸쭉한 액체)"> 6형 - 걸쭉한 액체</label>
+          <label><input type="radio" name="bristol" value="7형(액체)"> 7형 - 액체</label>
+        </div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">변비 증상</label><div class="rg"><label><input type="radio" name="constipation" value="예"> 예</label><label><input type="radio" name="constipation" value="아니오"> 아니오</label></div></div>
+      <div class="fg third"><label class="fl">설사 증상</label><div class="rg"><label><input type="radio" name="diarrhea" value="예"> 예</label><label><input type="radio" name="diarrhea" value="아니오"> 아니오</label></div></div>
+      <div class="fg third"><label class="fl">배변 시 과도한 힘주기</label><div class="rg"><label><input type="radio" name="straining" value="예"> 예</label><label><input type="radio" name="straining" value="아니오"> 아니오</label></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">대변 보류 습관</label><div class="rg"><label><input type="radio" name="withhold" value="예"> 예</label><label><input type="radio" name="withhold" value="아니오"> 아니오</label></div></div>
+      <div class="fg third"><label class="fl">불완전 배변감</label><div class="rg"><label><input type="radio" name="incomplete" value="예"> 예</label><label><input type="radio" name="incomplete" value="아니오"> 아니오</label></div></div>
+    </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">대변실금 관련 추가 정보</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">최초 증상 발생 시기</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="fi_onset" placeholder="0" min="0" style="width:80px"><span class="unit">년 전</span></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label class="fl">악화 요인 (중복 선택 가능)</label>
+        <div class="cg">
+          <label><input type="checkbox" name="fi_aggr" value="설사"> 설사</label>
+          <label><input type="checkbox" name="fi_aggr" value="기침/재채기"> 기침/재채기</label>
+          <label><input type="checkbox" name="fi_aggr" value="긴장"> 긴장</label>
+          <label><input type="checkbox" name="fi_aggr" value="특정 음식"> 특정 음식</label>
+          <label><input type="checkbox" name="fi_aggr_etc_chk" value="기타"> 기타: <input type="text" id="fi_aggr_etc" style="width:120px;margin-left:4px"></label>
+        </div>
+      </div>
+    </div>
+    <div class="frow"><div class="fg full"><label class="fl">주로 발생하는 상황</label><textarea id="fi_situation" placeholder="예: 이동 중, 식사 후, 운동 시"></textarea></div></div>
+    <div class="frow">
+      <div class="fg half"><label class="fl">패드 사용 여부</label>
+        <div class="rg">
+          <label><input type="radio" name="pad_use" value="예"> 예, 하루 <input type="number" id="pad_cnt" style="width:50px;margin:0 4px" min="0"> 장</label>
+          <label><input type="radio" name="pad_use" value="아니오"> 아니오</label>
+        </div>
+      </div>
+      <div class="fg half"><label class="fl">사회활동 제한 여부</label><div class="rg"><label><input type="radio" name="social_limit" value="예"> 예</label><label><input type="radio" name="social_limit" value="아니오"> 아니오</label></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label class="fl">이전 치료 경험 (중복 선택 가능)</label>
+        <div class="cg">
+          <label><input type="checkbox" name="fi_tx" value="약물"> 약물</label>
+          <label><input type="checkbox" name="fi_tx" value="바이오피드백"> 바이오피드백</label>
+          <label><input type="checkbox" name="fi_tx" value="골반저 운동"> 골반저 운동</label>
+          <label><input type="checkbox" name="fi_tx" value="수술"> 수술</label>
+          <label><input type="checkbox" name="fi_tx_etc_chk" value="기타"> 기타: <input type="text" id="fi_tx_etc" style="width:120px;margin-left:4px"></label>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s5')">← 이전</button><button class="btn btn-pri" onclick="go('s7')">다음 →</button></div>
+</div>
+
+<!-- S7 FIQOL -->
+<div class="sec-pg" id="s7">
+  <div class="sec-hd"><span class="sec-icon">💬</span><div><div class="sec-title">대변실금 관련 삶의 질 (FIQOL)</div><div class="sec-desc">변이 새는 것 때문에 겪는 문제를 1~4점으로 선택하세요. (1=전적으로 그렇다 ~ 4=그렇지 않다)</div></div></div>
+  <div class="card"><div class="card-hd">전반적 건강 상태</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg full"><label class="fl">1. 본인의 건강에 대해서 어떻게 생각하십니까?</label>
+        <div class="rg"><label><input type="radio" name="fiqol_health" value="1"> ① 최고도로 건강하다</label><label><input type="radio" name="fiqol_health" value="2"> ② 매우 좋다</label><label><input type="radio" name="fiqol_health" value="3"> ③ 좋은 편이다</label><label><input type="radio" name="fiqol_health" value="4"> ④ 괜찮은 편이다</label><label><input type="radio" name="fiqol_health" value="5"> ⑤ 나쁘다</label></div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label class="fl">2. 지난달 동안 슬프거나 무기력하게 느껴지는 일이 있었습니까?</label>
+        <div class="rg" style="flex-direction:column;gap:4px">
+          <label><input type="radio" name="fiqol_mood" value="1"> ① 너무 그런 기분이 들어서 다 포기하고 싶었다</label>
+          <label><input type="radio" name="fiqol_mood" value="2"> ② 그런 기분이 든 적이 매우 많았다</label>
+          <label><input type="radio" name="fiqol_mood" value="3"> ③ 그런 기분이 든 적이 많은 편이다</label>
+          <label><input type="radio" name="fiqol_mood" value="4"> ④ 약간 그런 편이었다</label>
+          <label><input type="radio" name="fiqol_mood" value="5"> ⑤ 전혀 그런 적이 없다</label>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">변이 새는 것으로 인한 문제 (1=전적으로 그렇다 ~ 4=그렇지 않다)</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left" width="62%">항목</th><th>1<br>전적으로</th><th>2<br>다소</th><th>3<br>보통</th><th>4<br>그렇지 않다</th></tr></thead>
+    <tbody id="fiqolTb"></tbody></table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">FIQOL 총점</div><div class="sc-val" id="fiqolScore">-</div></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s6')">← 이전</button><button class="btn btn-pri" onclick="go('s8')">다음 →</button></div>
+</div>
+<!-- S8 MMSE-KC -->
+<div class="sec-pg" id="s8">
+  <div class="sec-hd"><span class="sec-icon">🧠</span><div><div class="sec-title">인지기능검사 (MMSE-KC)</div><div class="sec-desc">0=틀림, 1=맞음, 9=평가안됨 &nbsp;|&nbsp; 총점은 9 제외 항목의 합산 (30점 만점)</div></div></div>
+  <div class="card"><div class="card-hd">MMSE-KC 항목</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left" width="60%">문항</th><th>틀림(0)</th><th>맞음(1)</th><th>평가안됨(9)</th></tr></thead>
+    <tbody id="mmseTb"></tbody></table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">MMSE-KC 총점</div><div class="sc-val" id="mmseScore">-</div></div>
+      <div class="sc-item"><div class="sc-label">만점</div><div style="font-size:12px;color:#718096">30점 (9 제외)</div></div>
+      <div id="mmseInterp" style="font-size:13px;align-self:center"></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s7')">← 이전</button><button class="btn btn-pri" onclick="go('s9')">다음 →</button></div>
+</div>
+
+<!-- S9 GDS-SF -->
+<div class="sec-pg" id="s9">
+  <div class="sec-hd"><span class="sec-icon">😔</span><div><div class="sec-title">우울 검사 (GDS-SF)</div><div class="sec-desc">최근의 느낌이나 생각과 가장 잘 맞는 항목에 체크하세요.</div></div></div>
+  <div class="card"><div class="card-hd">GDS-SF 항목 (15문항)</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th width="5%">번호</th><th style="text-align:left">질문</th><th width="28%">응답</th></tr></thead>
+    <tbody id="gdsTb"></tbody></table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">GDS 총점</div><div class="sc-val" id="gdsScore">-</div></div>
+      <div id="gdsInterp" style="font-size:13px;align-self:center"></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s8')">← 이전</button><button class="btn btn-pri" onclick="go('s10')">다음 →</button></div>
+</div>
+
+<!-- S10 KFES-I -->
+<div class="sec-pg" id="s10">
+  <div class="sec-hd"><span class="sec-icon">🚶</span><div><div class="sec-title">낙상효능척도 (KFES-I)</div><div class="sec-desc">각 활동을 넘어지지 않고 할 자신감을 1~4점으로 선택하세요. (1=전혀 문제없다 ~ 4=매우 어렵다)</div></div></div>
+  <div class="card"><div class="card-hd">KFES-I 항목 (16문항)</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left" width="45%">항목</th><th>1<br>전혀 문제없다</th><th>2<br>약간 어렵다</th><th>3<br>상당히 어렵다</th><th>4<br>매우 어렵다</th></tr></thead>
+    <tbody id="kfesTb"></tbody></table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">KFES-I 총점</div><div class="sc-val" id="kfesScore">-</div></div>
+      <div id="kfesInterp" style="font-size:13px;align-self:center"></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s9')">← 이전</button><button class="btn btn-pri" onclick="go('s11')">다음 →</button></div>
+</div>
+
+<!-- S11 IPAQ -->
+<div class="sec-pg" id="s11">
+  <div class="sec-hd"><span class="sec-icon">🏃</span><div><div class="sec-title">주간 신체활동 (IPAQ Short Form)</div><div class="sec-desc">지난 7일간의 신체활동을 기록하세요. (한 번에 10분 이상 지속한 활동만 해당)</div></div></div>
+  <div class="card"><div class="card-hd">격렬한 신체적 활동 (무거운 짐 옮기기, 에어로빅, 빠른 자전거 타기 등)</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">격렬한 신체적 활동 경험</label><div class="rg"><label><input type="radio" name="vig_exp" value="있음"> 있음</label><label><input type="radio" name="vig_exp" value="없음"> 없음 (→ 중정도로 이동)</label></div></div></div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">격렬한 활동 일수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="vig_days" placeholder="0" min="0" max="7" style="width:70px"><span class="unit">일/주</span></div></div>
+      <div class="fg third"><label class="fl">하루 격렬 활동 시간</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="vig_hr" placeholder="0" min="0" style="width:60px"><span class="unit">시간</span><input type="number" id="vig_min" placeholder="0" min="0" max="59" style="width:60px;margin-left:6px"><span class="unit">분</span></div></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">중정도 신체적 활동 (가벼운 짐 옮기기, 정상 속도 자전거 타기, 복식 테니스 등, 걷기 제외)</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">중정도 신체적 활동 경험</label><div class="rg"><label><input type="radio" name="mod_exp" value="있음"> 있음</label><label><input type="radio" name="mod_exp" value="없음"> 없음 (→ 걷기로 이동)</label></div></div></div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">중정도 활동 일수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="mod_days" placeholder="0" min="0" max="7" style="width:70px"><span class="unit">일/주</span></div></div>
+      <div class="fg third"><label class="fl">하루 중정도 활동 시간</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="mod_hr" placeholder="0" min="0" style="width:60px"><span class="unit">시간</span><input type="number" id="mod_min" placeholder="0" min="0" max="59" style="width:60px;margin-left:6px"><span class="unit">분</span></div></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">걷기 (일터, 집, 레저, 운동 목적 모두 포함)</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">걷기 일수 (10분 이상)</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="walk_days" placeholder="0" min="0" max="7" style="width:70px"><span class="unit">일/주</span></div></div>
+      <div class="fg third"><label class="fl">하루 걷기 시간</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="walk_hr" placeholder="0" min="0" style="width:60px"><span class="unit">시간</span><input type="number" id="walk_min" placeholder="0" min="0" max="59" style="width:60px;margin-left:6px"><span class="unit">분</span></div></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">근력 운동 (팔굽혀펴기, 윗몸일으키기, 아령, 역기, 철봉 등)</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">근력 운동 경험</label><div class="rg"><label><input type="radio" name="str_exp" value="있음"> 있음</label><label><input type="radio" name="str_exp" value="없음"> 없음</label></div></div></div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">근력 운동 일수</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="str_days" placeholder="0" min="0" max="7" style="width:70px"><span class="unit">일/주</span></div></div>
+      <div class="fg third"><label class="fl">하루 근력 운동 시간</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="str_hr" placeholder="0" min="0" style="width:60px"><span class="unit">시간</span><input type="number" id="str_min" placeholder="0" min="0" max="59" style="width:60px;margin-left:6px"><span class="unit">분</span></div></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">좌식 시간 (평일 — 책상, 친구 만남, 독서, TV 포함)</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">평일 앉아서 보낸 시간</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="sit_hr" placeholder="0" min="0" style="width:60px"><span class="unit">시간</span><input type="number" id="sit_min" placeholder="0" min="0" max="59" style="width:60px;margin-left:6px"><span class="unit">분</span></div></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s10')">← 이전</button><button class="btn btn-pri" onclick="go('s12')">다음 →</button></div>
+</div>
+
+<!-- S12 신체구성 혈압 -->
+<div class="sec-pg" id="s12">
+  <div class="sec-hd"><span class="sec-icon">📏</span><div><div class="sec-title">신체구성 및 혈압 측정</div></div></div>
+  <div class="card"><div class="card-hd">신체계측</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">신장</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="height" placeholder="0.0" step="0.1"><span class="unit">cm</span></div></div>
+      <div class="fg third"><label class="fl">체중</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="weight" placeholder="0.0" step="0.1"><span class="unit">kg</span></div></div>
+    </div>
+    <table class="tbl"><thead><tr><th style="text-align:left">측정 항목</th><th>1차 (cm)</th><th>2차 (cm)</th></tr></thead><tbody>
+      <tr><td>허리둘레</td><td><input type="number" id="waist1" placeholder="0.0" step="0.1"></td><td><input type="number" id="waist2" placeholder="0.0" step="0.1"></td></tr>
+      <tr><td>엉덩이둘레</td><td><input type="number" id="hip1" placeholder="0.0" step="0.1"></td><td><input type="number" id="hip2" placeholder="0.0" step="0.1"></td></tr>
+      <tr><td>허벅지둘레</td><td><input type="number" id="thigh1" placeholder="0.0" step="0.1"></td><td><input type="number" id="thigh2" placeholder="0.0" step="0.1"></td></tr>
+      <tr><td>종아리둘레</td><td><input type="number" id="calf1" placeholder="0.0" step="0.1"></td><td><input type="number" id="calf2" placeholder="0.0" step="0.1"></td></tr>
+      <tr><td>상완둘레</td><td><input type="number" id="arm1" placeholder="0.0" step="0.1"></td><td><input type="number" id="arm2" placeholder="0.0" step="0.1"></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">혈압 및 심박수</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th>회차</th><th>수축기 (mmHg)</th><th>이완기 (mmHg)</th><th>심박수 (회/분)</th></tr></thead><tbody>
+      <tr><td>1차</td><td><input type="number" id="sbp1" placeholder="0"></td><td><input type="number" id="dbp1" placeholder="0"></td><td><input type="number" id="hr1" placeholder="0"></td></tr>
+      <tr><td>2차</td><td><input type="number" id="sbp2" placeholder="0"></td><td><input type="number" id="dbp2" placeholder="0"></td><td><input type="number" id="hr2" placeholder="0"></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">신체활동 객관적 평가 (Actigraph GT3X+)</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">측정 시작일</label><input type="date" id="acti_start"></div>
+      <div class="fg third"><label class="fl">측정 종료일</label><input type="date" id="acti_end"></div>
+      <div class="fg third"><label class="fl">유효 착용 일수 (최소 4일)</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="acti_valid" placeholder="0" min="0"><span class="unit">일</span></div></div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">일일 평균 착용 시간</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="acti_wear_hr" placeholder="0" min="0" style="width:60px"><span class="unit">시간</span><input type="number" id="acti_wear_min" placeholder="0" min="0" max="59" style="width:60px;margin-left:6px"><span class="unit">분</span></div></div>
+    </div>
+    <table class="tbl"><thead><tr><th style="text-align:left">측정 항목</th><th>측정값</th></tr></thead><tbody>
+      <tr><td>일일 평균 걸음 수</td><td><input type="number" id="acti_steps" placeholder="0"> <span class="unit">보</span></td></tr>
+      <tr><td>일일 평균 좌식시간</td><td><input type="number" id="acti_sed" placeholder="0"> <span class="unit">분</span></td></tr>
+      <tr><td>일일 평균 경도 활동시간</td><td><input type="number" id="acti_light" placeholder="0"> <span class="unit">분</span></td></tr>
+      <tr><td>일일 평균 중강도 활동시간</td><td><input type="number" id="acti_mod" placeholder="0"> <span class="unit">분</span></td></tr>
+      <tr><td>일일 평균 고강도 활동시간</td><td><input type="number" id="acti_vig" placeholder="0"> <span class="unit">분</span></td></tr>
+      <tr><td>일일 평균 중고강도 활동시간 (MVPA)</td><td><input type="number" id="acti_mvpa" placeholder="0"> <span class="unit">분</span></td></tr>
+      <tr><td>일일 평균 활동 에너지 소비량</td><td><input type="number" id="acti_kcal" placeholder="0"> <span class="unit">kcal</span></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s11')">← 이전</button><button class="btn btn-pri" onclick="go('s13')">다음 →</button></div>
+</div>
+
+<!-- S13 노쇠지표 MNA EQ5D -->
+<div class="sec-pg" id="s13">
+  <div class="sec-hd"><span class="sec-icon">⚡</span><div><div class="sec-title">노쇠지표 &amp; 간이영양상태 (MNA) &amp; EQ-5D-5L</div></div></div>
+  <div class="card"><div class="card-hd">노쇠지표</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">1. 체중이 1년 전에 비해 5kg 이상 감소하였습니까? (다이어트/운동 제외)</label><div class="rg"><label><input type="radio" name="frail1" value="그렇다"> ① 그렇다</label><label><input type="radio" name="frail1" value="그렇지 않다"> ② 그렇지 않다</label></div></div></div>
+    <div class="frow">
+      <div class="fg half"><label class="fl">2-1. 지난 한 주 동안 모든 일이 힘들었습니까?</label>
+        <div class="rg" style="flex-direction:column;gap:4px">
+          <label><input type="radio" name="frail2a" value="1"> ① 잠깐 또는 없었음 (하루 미만)</label>
+          <label><input type="radio" name="frail2a" value="2"> ② 가끔 (1-2일)</label>
+          <label><input type="radio" name="frail2a" value="3"> ③ 자주 (3-4일)</label>
+          <label><input type="radio" name="frail2a" value="4"> ④ 항상 (5-7일)</label>
+        </div>
+      </div>
+      <div class="fg half"><label class="fl">2-2. 도무지 해나갈 수 없다는 느낌이 들었습니까?</label>
+        <div class="rg" style="flex-direction:column;gap:4px">
+          <label><input type="radio" name="frail2b" value="1"> ① 잠깐 또는 없었음 (하루 미만)</label>
+          <label><input type="radio" name="frail2b" value="2"> ② 가끔 (1-2일)</label>
+          <label><input type="radio" name="frail2b" value="3"> ③ 자주 (3-4일)</label>
+          <label><input type="radio" name="frail2b" value="4"> ④ 항상 (5-7일)</label>
+        </div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">보행속도 (Walking Time)</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="gait_speed" placeholder="0.0" step="0.1"><span class="unit">초</span></div></div>
+      <div class="fg third"><label class="fl">악력 (Hand Grip)</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="grip_frail" placeholder="0.0" step="0.1"><span class="unit">kg</span></div></div>
+      <div class="fg third"><label class="fl">에너지 소비</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="energy_expend" placeholder="0"><span class="unit">kcal</span></div></div>
+    </div>
+    <table class="ctbl"><thead><tr><th style="text-align:left">항목</th><th>예</th><th>아니오</th></tr></thead><tbody>
+      <tr><td>계단 손잡이나 벽을 짚지 않고 계단을 올라갑니까?</td><td class="yn"><label><input type="radio" name="frail_stair" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="frail_stair" value="아니오"> 아니오</label></td></tr>
+      <tr><td>의자에 앉은 상태에서 부축이나 지팡이 없이 일어납니까?</td><td class="yn"><label><input type="radio" name="frail_chair" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="frail_chair" value="아니오"> 아니오</label></td></tr>
+      <tr><td>15분 정도 쉬지 않고 걸어 다닙니까?</td><td class="yn"><label><input type="radio" name="frail_walk15" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="frail_walk15" value="아니오"> 아니오</label></td></tr>
+      <tr><td>지난 1년간 넘어진 적이 있습니까?</td><td class="yn"><label><input type="radio" name="frail_fall" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="frail_fall" value="아니오"> 아니오</label></td></tr>
+      <tr><td>넘어지는 것에 대한 걱정이나 염려가 큽니까?</td><td class="yn"><label><input type="radio" name="frail_fear" value="예"> 예</label></td><td class="yn"><label><input type="radio" name="frail_fear" value="아니오"> 아니오</label></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">간이영양상태조사 (MNA)</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">측정 일시</label><input type="date" id="mna_date"></div>
+      <div class="fg third"><label class="fl">MNA 총점</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="mna_score" placeholder="0" min="0" max="30" step="0.5"><span class="unit">/ 30점</span></div></div>
+      <div class="fg third"><label class="fl">평가</label>
+        <select id="mna_eval"><option value="">선택</option><option>정상영양상태 (24-30점)</option><option>영양불량 위험 (17-23.5점)</option><option>영양불량 (&lt;17점)</option></select>
+      </div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">건강관련 삶의 질 (EQ-5D-5L)</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">현재 귀하의 건강상태</label>
+      <div class="rg"><label><input type="radio" name="eq5d_overall" value="1"> ① 매우 건강</label><label><input type="radio" name="eq5d_overall" value="2"> ② 건강하다</label><label><input type="radio" name="eq5d_overall" value="3"> ③ 보통이다</label><label><input type="radio" name="eq5d_overall" value="4"> ④ 건강하지 못하다</label><label><input type="radio" name="eq5d_overall" value="5"> ⑤ 매우 건강하지 못하다</label></div>
+    </div></div>
+    <table class="tbl"><thead><tr><th style="text-align:left">영역</th><th>1 (문제없다)</th><th>2 (약간)</th><th>3 (중등도)</th><th>4 (심한)</th><th>5 (매우 심함/불가)</th></tr></thead><tbody>
+      <tr><td>운동능력</td><td><label><input type="radio" name="eq5d_mob" value="1"> 1</label></td><td><label><input type="radio" name="eq5d_mob" value="2"> 2</label></td><td><label><input type="radio" name="eq5d_mob" value="3"> 3</label></td><td><label><input type="radio" name="eq5d_mob" value="4"> 4</label></td><td><label><input type="radio" name="eq5d_mob" value="5"> 5</label></td></tr>
+      <tr><td>자기관리</td><td><label><input type="radio" name="eq5d_sc" value="1"> 1</label></td><td><label><input type="radio" name="eq5d_sc" value="2"> 2</label></td><td><label><input type="radio" name="eq5d_sc" value="3"> 3</label></td><td><label><input type="radio" name="eq5d_sc" value="4"> 4</label></td><td><label><input type="radio" name="eq5d_sc" value="5"> 5</label></td></tr>
+      <tr><td>일상활동</td><td><label><input type="radio" name="eq5d_ua" value="1"> 1</label></td><td><label><input type="radio" name="eq5d_ua" value="2"> 2</label></td><td><label><input type="radio" name="eq5d_ua" value="3"> 3</label></td><td><label><input type="radio" name="eq5d_ua" value="4"> 4</label></td><td><label><input type="radio" name="eq5d_ua" value="5"> 5</label></td></tr>
+      <tr><td>통증/불편</td><td><label><input type="radio" name="eq5d_pd" value="1"> 1</label></td><td><label><input type="radio" name="eq5d_pd" value="2"> 2</label></td><td><label><input type="radio" name="eq5d_pd" value="3"> 3</label></td><td><label><input type="radio" name="eq5d_pd" value="4"> 4</label></td><td><label><input type="radio" name="eq5d_pd" value="5"> 5</label></td></tr>
+      <tr><td>불안/우울</td><td><label><input type="radio" name="eq5d_ad" value="1"> 1</label></td><td><label><input type="radio" name="eq5d_ad" value="2"> 2</label></td><td><label><input type="radio" name="eq5d_ad" value="3"> 3</label></td><td><label><input type="radio" name="eq5d_ad" value="4"> 4</label></td><td><label><input type="radio" name="eq5d_ad" value="5"> 5</label></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s12')">← 이전</button><button class="btn btn-pri" onclick="go('s14')">다음 →</button></div>
+</div>
+
+<!-- S14 근골격계 -->
+<div class="sec-pg" id="s14">
+  <div class="sec-hd"><span class="sec-icon">🏋️</span><div><div class="sec-title">근골격계 지표 평가 (DEXA / SPPB / 노인 체력)</div></div></div>
+  <div class="card"><div class="card-hd">전신 체성분 분석 (DEXA)</div><div class="card-bd">
+    <div class="frow"><div class="fg third"><label class="fl">측정 일시</label><input type="date" id="dexa_date"></div></div>
+    <table class="tbl"><thead><tr><th style="text-align:left">측정 항목</th><th>측정값</th><th>참고범위</th><th>평가</th></tr></thead><tbody>
+      <tr><td>체지방률 (%)</td><td><input type="number" id="dexa_fat" placeholder="0.0" step="0.1"></td><td style="font-size:11px">남 15-25 / 여 25-35</td><td><select id="dexa_fat_eval"><option value="">선택</option><option>정상</option><option>비정상</option></select></td></tr>
+      <tr><td>제지방량 (kg)</td><td><input type="number" id="dexa_lean" placeholder="0.0" step="0.1"></td><td>-</td><td>-</td></tr>
+      <tr><td>사지근육량 ASM (kg)</td><td><input type="number" id="dexa_asm" placeholder="0.0" step="0.1"></td><td>-</td><td>-</td></tr>
+      <tr><td>ASM/height² (kg/m²)</td><td><input type="number" id="dexa_asm_ht" placeholder="0.00" step="0.01"></td><td style="font-size:11px">남 ≥7.0 / 여 ≥5.4</td><td><select id="dexa_asm_eval"><option value="">선택</option><option>정상</option><option>근감소증</option></select></td></tr>
+      <tr><td>골밀도 T-score</td><td><input type="number" id="dexa_tscore" placeholder="0.0" step="0.1"></td><td style="font-size:11px">≥-1.0: 정상<br>-2.5~-1.0: 골감소증<br>≤-2.5: 골다공증</td><td><select id="dexa_bone_eval"><option value="">선택</option><option>정상</option><option>골감소증</option><option>골다공증</option></select></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">SPPB 검사</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left">항목</th><th>측정치</th><th>점수 (0-4점)</th></tr></thead><tbody>
+      <tr><td>균형 검사 (발 모으고 서기, 반일자서기, 일자서기)</td><td><input type="text" id="sppb_bal_val" placeholder="초 등 측정치"></td><td><input type="number" id="sppb_bal" placeholder="0" min="0" max="4" onchange="calcSPPB()"></td></tr>
+      <tr><td>4m 보행속도</td><td><input type="text" id="sppb_gait_val" placeholder="초"></td><td><input type="number" id="sppb_gait" placeholder="0" min="0" max="4" onchange="calcSPPB()"></td></tr>
+      <tr><td>의자 일어서기 (5회)</td><td><input type="text" id="sppb_chair_val" placeholder="초"></td><td><input type="number" id="sppb_chair" placeholder="0" min="0" max="4" onchange="calcSPPB()"></td></tr>
+    </tbody></table>
+    <div class="sc-box">
+      <div class="sc-item"><div class="sc-label">SPPB 총점</div><div class="sc-val" id="sppbScore">-</div></div>
+      <div id="sppbInterp" style="font-size:13px;align-self:center"></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">노인 체력 검사</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left">항목</th><th>측정치 1차</th><th>측정치 2차</th><th>단위/비고</th></tr></thead><tbody>
+      <tr><td>악력 좌</td><td><input type="number" id="grip_l1" placeholder="0.0" step="0.1"></td><td><input type="number" id="grip_l2" placeholder="0.0" step="0.1"></td><td>kg / 악력계</td></tr>
+      <tr><td>악력 우</td><td><input type="number" id="grip_r1" placeholder="0.0" step="0.1"></td><td><input type="number" id="grip_r2" placeholder="0.0" step="0.1"></td><td>kg / 악력계</td></tr>
+      <tr><td>하체근력 (의자 앉았다 일어서기)</td><td><input type="number" id="lower_str" placeholder="0"></td><td>-</td><td>회/30초</td></tr>
+      <tr><td>상체근력 좌 (30초 덤벨들기)</td><td><input type="number" id="upper_l" placeholder="0"></td><td>-</td><td>회</td></tr>
+      <tr><td>상체근력 우 (30초 덤벨들기)</td><td><input type="number" id="upper_r" placeholder="0"></td><td>-</td><td>회</td></tr>
+      <tr><td>동적평형성 (앉아서 3m 콘 돌고 오기)</td><td><input type="number" id="dyn_bal" placeholder="0.0" step="0.1"></td><td>-</td><td>초</td></tr>
+      <tr><td>좌전굴</td><td><input type="number" id="flex1" placeholder="0.0" step="0.1"></td><td><input type="number" id="flex2" placeholder="0.0" step="0.1"></td><td>cm</td></tr>
+      <tr><td>심폐지구력 (6분 걷기)</td><td><input type="number" id="cardio" placeholder="0"></td><td>-</td><td>m</td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s13')">← 이전</button><button class="btn btn-pri" onclick="go('s15')">다음 →</button></div>
+</div>
+
+<!-- S15 항문괄약근 -->
+<div class="sec-pg" id="s15">
+  <div class="sec-hd"><span class="sec-icon">💊</span><div><div class="sec-title">항문괄약근 평가</div></div></div>
+  <div class="card"><div class="card-hd">항문압력 측정</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">측정 일시</label><input type="date" id="sphincter_date"></div>
+      <div class="fg third"><label class="fl">사용 장비</label><input type="text" id="sphincter_device" placeholder="장비명 입력"></div>
+    </div>
+    <table class="tbl"><thead><tr><th style="text-align:left">측정 항목</th><th>측정값</th><th>참고범위</th><th>평가</th></tr></thead><tbody>
+      <tr><td>항문 휴지기 압력 (mmHg)</td><td><input type="number" id="anal_rest" placeholder="0" step="0.1"></td><td>60-80</td><td><select id="anal_rest_eval"><option value="">선택</option><option>정상</option><option>비정상</option></select></td></tr>
+      <tr><td>최대 수축 압력 (mmHg)</td><td><input type="number" id="anal_squeeze" placeholder="0" step="0.1"></td><td>100-180</td><td><select id="anal_sq_eval"><option value="">선택</option><option>정상</option><option>비정상</option></select></td></tr>
+      <tr><td>최대 수축 유지 시간 (초)</td><td><input type="number" id="anal_dur" placeholder="0" step="0.1"></td><td>≥30</td><td><select id="anal_dur_eval"><option value="">선택</option><option>정상</option><option>비정상</option></select></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s14')">← 이전</button><button class="btn btn-pri" onclick="go('s16')">다음 →</button></div>
+</div>
+<!-- S16 7일 신체활동 기록 -->
+<div class="sec-pg" id="s16">
+  <div class="sec-hd"><span class="sec-icon">📅</span><div><div class="sec-title">7일간 신체활동 기록</div><div class="sec-desc">Actigraph 착용 기간 동안의 일일 활동 기록 (1일차 배부 ~ 9일차 반납)</div></div></div>
+  <div class="card"><div class="card-hd">신체활동 기록 (9일)</div><div class="card-bd" style="overflow-x:auto">
+    <table class="tbl" style="min-width:980px"><thead><tr>
+      <th width="9%">일차</th><th width="13%">날짜</th><th width="8%">착용 여부</th>
+      <th>좌식 행동 유형<br><span style="font-weight:400;font-size:10px">(담소, 독서, TV 등)</span></th>
+      <th>중/고강도 활동 및 운동<br><span style="font-weight:400;font-size:10px">(산책, 등산, 헬스 등)</span></th>
+      <th>기타 활동<br><span style="font-weight:400;font-size:10px">(집안일, 근무, 봉사 등)</span></th>
+      <th>특이 사항</th>
+    </tr></thead><tbody id="paTb"></tbody></table>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s15')">← 이전</button><button class="btn btn-pri" onclick="go('s17')">다음 →</button></div>
+</div>
+
+<!-- S17 7일 배변일기 -->
+<div class="sec-pg" id="s17">
+  <div class="sec-hd"><span class="sec-icon">📔</span><div><div class="sec-title">7일간 배변일기</div></div></div>
+  <div class="card"><div class="card-hd">작성 기간</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">시작일</label><input type="date" id="bd_start"></div>
+      <div class="fg third"><label class="fl">종료일</label><input type="date" id="bd_end"></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-hd">배변일기 (7일)</div><div class="card-bd" style="overflow-x:auto">
+    <table class="tbl" style="min-width:1000px"><thead><tr>
+      <th width="7%">일차</th><th width="12%">날짜</th><th width="8%">배변 횟수</th>
+      <th width="13%">대변 형태<br>(Bristol)</th><th width="8%">실금 횟수</th>
+      <th width="14%">실금 종류</th><th>관련 상황/요인</th><th>식이 특이사항</th>
+    </tr></thead><tbody id="bdTb"></tbody></table>
+    <div class="fg full" style="margin-top:10px"><label class="fl">특이사항</label><textarea id="bd_note" placeholder="배변일기 관련 특이사항 입력"></textarea></div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s16')">← 이전</button><button class="btn btn-pri" onclick="go('s18')">다음 →</button></div>
+</div>
+
+<!-- S18 24시간 회상법 -->
+<div class="sec-pg" id="s18">
+  <div class="sec-hd"><span class="sec-icon">🍚</span><div><div class="sec-title">24시간 회상법 (24HR)</div><div class="sec-desc">7일치 식사 기록 — 상단 탭으로 일차를 이동하세요.</div></div></div>
+  <div class="day-tabs" id="hrTabs"></div>
+  <div id="hrPanels"></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s17')">← 이전</button><button class="btn btn-pri" onclick="go('s19')">다음 →</button></div>
+</div>
+
+<!-- S19 FFQ -->
+<div class="sec-pg" id="s19">
+  <div class="sec-hd"><span class="sec-icon">🥗</span><div><div class="sec-title">식품섭취빈도 조사지 (FFQ)</div><div class="sec-desc">지난 1년(또는 6개월)간의 평균적인 섭취 빈도</div></div></div>
+  <div class="card"><div class="card-hd">가) 식품군별 섭취 빈도</div><div class="card-bd" style="overflow-x:auto">
+    <table class="tbl ffq-tbl"><thead><tr>
+      <th style="text-align:left" width="13%">분류</th><th style="text-align:left" width="17%">식품 종류</th>
+      <th>거의<br>안 먹음</th><th>월<br>1-3회</th><th>주<br>1-2회</th><th>주<br>3-4회</th><th>주<br>5-6회</th><th>일 1회</th><th>일 2회<br>이상</th><th width="13%">1회 평균<br>섭취량</th>
+    </tr></thead><tbody id="ffqTb"></tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">나) 보충제 사용</div><div class="card-bd" style="overflow-x:auto">
+    <table class="tbl" style="min-width:760px"><thead><tr>
+      <th style="text-align:left" width="20%">보충제 유형</th><th width="16%">복용 여부</th><th width="18%">복용 빈도</th><th>제품명/브랜드</th><th width="18%">복용 기간</th>
+    </tr></thead><tbody id="suppTb"></tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">다) 식이 행동 및 패턴</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">일반적인 식사 패턴</label>
+      <div class="rg"><label><input type="radio" name="diet_pattern" value="하루 3끼 규칙적">하루 3끼 규칙적</label><label><input type="radio" name="diet_pattern" value="하루 2끼 규칙적">하루 2끼 규칙적</label><label><input type="radio" name="diet_pattern" value="불규칙적">불규칙적</label><label><input type="radio" name="diet_pattern" value="기타">기타</label><input type="text" id="diet_pattern_etc" placeholder="기타 내용" style="width:160px"></div></div></div>
+    <div class="frow"><div class="fg full"><label class="fl">식사 시간 규칙성</label>
+      <div class="rg"><label><input type="radio" name="meal_reg" value="매우 규칙적">매우 규칙적</label><label><input type="radio" name="meal_reg" value="대체로 규칙적">대체로 규칙적</label><label><input type="radio" name="meal_reg" value="불규칙적">불규칙적</label><label><input type="radio" name="meal_reg" value="매우 불규칙적">매우 불규칙적</label></div></div></div>
+    <div class="frow"><div class="fg full"><label class="fl">일반적인 식사량</label>
+      <div class="rg"><label><input type="radio" name="meal_amt" value="소량">소량</label><label><input type="radio" name="meal_amt" value="보통">보통</label><label><input type="radio" name="meal_amt" value="대량">대량</label><label><input type="radio" name="meal_amt" value="매우 불규칙적">매우 불규칙적</label></div></div></div>
+    <div class="frow"><div class="fg full"><label class="fl">야식(저녁 9시 이후 식사) 빈도</label>
+      <div class="rg"><label><input type="radio" name="night_eat" value="거의 없음">거의 없음</label><label><input type="radio" name="night_eat" value="주 1-2회">주 1-2회</label><label><input type="radio" name="night_eat" value="주 3-4회">주 3-4회</label><label><input type="radio" name="night_eat" value="거의 매일">거의 매일</label></div></div></div>
+    <div class="frow"><div class="fg full"><label class="fl">최근 1년간 식습관 변화</label>
+      <div class="rg"><label><input type="radio" name="diet_change" value="큰 변화 없음">큰 변화 없음</label><label><input type="radio" name="diet_change" value="약간 변화">약간 변화</label><label><input type="radio" name="diet_change" value="상당한 변화">상당한 변화</label><input type="text" id="diet_change_detail" placeholder="변화 내용" style="width:200px"></div></div></div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s18')">← 이전</button><button class="btn btn-pri" onclick="go('s20')">다음 →</button></div>
+</div>
+
+<!-- S20 장내 미생물 검체 -->
+<div class="sec-pg" id="s20">
+  <div class="sec-hd"><span class="sec-icon">🧫</span><div><div class="sec-title">장내 미생물 검체 수집정보</div></div></div>
+  <div class="card"><div class="card-hd">검체 수집 정보</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">수집 일자</label><input type="date" id="mb_date"></div>
+      <div class="fg third"><label class="fl">수집 시각</label><input type="time" id="mb_time"></div>
+      <div class="fg third"><label class="fl">검체 ID</label><input type="text" id="mb_id" placeholder="검체 ID 입력"></div>
+    </div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">보관 온도</label><input type="text" id="mb_temp" value="-80°C"></div>
+      <div class="fg third"><label class="fl">검체 품질</label>
+        <div class="rg"><label><input type="radio" name="mb_quality" value="양호">양호</label><label><input type="radio" name="mb_quality" value="불량">불량</label></div></div>
+      <div class="fg third"><label class="fl">불량 사유</label><input type="text" id="mb_bad_reason" placeholder="불량 시 사유 입력"></div>
+    </div>
+  </div></div>
+  <div class="abar"><button class="btn btn-out" onclick="go('s19')">← 이전</button><button class="btn btn-pri" onclick="go('s21')">다음 →</button></div>
+</div>
+
+<!-- S21 검사자 확인 & 추적관리 -->
+<div class="sec-pg" id="s21">
+  <div class="sec-hd"><span class="sec-icon">✅</span><div><div class="sec-title">검사자 확인 &amp; 추적관리</div></div></div>
+  <div class="card"><div class="card-hd">검사 완료 확인</div><div class="card-bd">
+    <table class="tbl"><thead><tr><th style="text-align:left" width="40%">평가 항목</th><th width="12%">완료</th><th width="12%">미완료</th><th>미완료 사유</th></tr></thead><tbody id="chkTb"></tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">추적 관리</div><div class="card-bd">
+    <div class="frow"><div class="fg full"><label class="fl">연구 완료 여부</label>
+      <div class="rg"><label><input type="radio" name="study_done" value="완료">완료</label><label><input type="radio" name="study_done" value="중도탈락">중도탈락</label></div></div></div>
+    <div class="frow"><div class="fg full"><label class="fl">연구 중도탈락 사유</label>
+      <div class="rg"><label><input type="radio" name="dropout" value="자발적 철회">자발적 철회</label><label><input type="radio" name="dropout" value="이상반응">이상반응</label><label><input type="radio" name="dropout" value="선정기준 위배">선정기준 위배</label><label><input type="radio" name="dropout" value="연락 두절">연락 두절</label><label><input type="radio" name="dropout" value="기타">기타</label><input type="text" id="dropout_etc" placeholder="기타 사유" style="width:180px"></div></div></div>
+  </div></div>
+  <div class="card"><div class="card-hd">향후 연구 참여 의향</div><div class="card-bd">
+    <table class="ctbl"><tbody>
+      <tr><td>후속 연구 참여 의향</td><td><div class="yn"><label><input type="radio" name="fu_join" value="예">예</label><label><input type="radio" name="fu_join" value="아니오">아니오</label></div></td></tr>
+      <tr><td>연구 결과 요약 제공 희망 여부</td><td><div class="yn"><label><input type="radio" name="fu_summary" value="예">예</label><label><input type="radio" name="fu_summary" value="아니오">아니오</label></div></td></tr>
+      <tr><td>개인 결과 상담 희망 여부</td><td><div class="yn"><label><input type="radio" name="fu_consult" value="예">예</label><label><input type="radio" name="fu_consult" value="아니오">아니오</label></div></td></tr>
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">서명 확인</div><div class="card-bd">
+    <div class="frow">
+      <div class="fg third"><label class="fl">작성일 (검사자)</label><input type="date" id="sign_date1"></div>
+      <div class="fg third"><label class="fl">작성자 성명</label><input type="text" id="sign_name1" placeholder="검사자 성명"></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin:6px 0 14px">상기 내용이 정확하게 기록/평가되었음을 확인합니다.</div>
+    <div class="frow">
+      <div class="fg third"><label class="fl">작성일 (연구자)</label><input type="date" id="sign_date2"></div>
+      <div class="fg third"><label class="fl">연구자 성명</label><input type="text" id="sign_name2" placeholder="연구자 성명"></div>
+    </div>
+  </div></div>
+  <div class="abar">
+    <button class="btn btn-out" onclick="go('s20')">← 이전</button>
+    <button class="btn btn-suc" onclick="saveData(true)">💾 최종 저장</button>
+    <button class="btn btn-pri" onclick="exportCSV()">📊 Excel(CSV) 추출</button>
+  </div>
+</div>
+</div><!-- /view-crf -->
+<div class="view" id="view-init"></div>
+<div class="view" id="view-fu"></div>
+
+</main>
+
+<div id="toast"></div>
+
+<!-- 응답 관리 모달 -->
+<div class="mo" id="mgrModal">
+  <div class="mo-box">
+    <button class="mo-close" onclick="closeMgr()">✕</button>
+    <h2>📂 저장된 응답 관리</h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">이 브라우저에 저장된 응답 목록입니다. 불러오기로 수정하거나, 유형별로 전체 응답을 CSV로 추출할 수 있습니다.</div>
+    <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-suc" onclick="exportAllCSV()">📊 CRF 전체 추출</button>
+      <button class="btn btn-suc" onclick="exportAllVisit('init')">📊 초진 전체 추출</button>
+      <button class="btn btn-suc" onclick="exportAllVisit('fu')">📊 재진 전체 추출</button>
+    </div>
+    <div id="recList"></div>
+  </div>
+</div>
+
+<!-- 데이터 시트 모달 (구글시트 형태) -->
+<div class="mo" id="sheetModal">
+  <div class="mo-box" style="width:96vw;max-width:1400px;max-height:90vh">
+    <button class="mo-close" onclick="closeSheet()">✕</button>
+    <h2 style="display:flex;align-items:center;gap:12px">📑 데이터 시트 — 전체 작성 현황 <span id="cloudStatus" style="font-size:12px;font-weight:400"></span></h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">지금까지 모든 대상자가 입력한 설문 내용을 화면에서 표로 봅니다. (행=대상자, 열=문항) — 엑셀 추출과 별개로 열람용입니다.</div>
+    <div class="sheet-tabs">
+      <button class="sheet-tab active" id="stab-crf" onclick="renderSheet('crf')">📋 CRF</button>
+      <button class="sheet-tab" id="stab-init" onclick="renderSheet('init')">🩺 초진</button>
+      <button class="sheet-tab" id="stab-fu" onclick="renderSheet('fu')">🔁 재진</button>
+      <input type="text" placeholder="🔍 이름·등록번호·연구번호 검색" oninput="onSheetSearch(this.value)" style="width:230px;margin-left:16px;padding:6px 10px;font-size:12px">
+      <span id="sheetCount" style="font-size:12px;color:var(--muted);margin-left:8px"></span>
+      <button class="btn btn-out btn-sm" style="margin-left:auto" onclick="refreshSheetFromCloud()">🔄 새로고침</button>
+      <button class="btn btn-suc btn-sm" onclick="exportCurrentSheet()">📥 Excel 추출</button>
+    </div>
+    <div class="sheet-wrap"><table class="sheet-tbl" id="sheetTbl"></table></div>
+    <div id="sheetEmpty" style="display:none;text-align:center;color:var(--muted);padding:40px">저장된 응답이 없습니다.</div>
+  </div>
+</div>
+
+<!-- 등록번호 검색 모달 (CRF에서 설문 연동) -->
+<div class="mo" id="searchModal">
+  <div class="mo-box" style="width:680px">
+    <button class="mo-close" onclick="closeSearch()">✕</button>
+    <h2>🔍 등록번호로 설문 검색 · 연동</h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">등록번호를 입력하면 해당 환자의 초진·재진 설문을 찾아 CRF로 공통 항목을 불러옵니다. 재진이 여러 건이면 작성 날짜를 선택하세요.</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input type="text" id="searchReg" placeholder="등록번호 입력" style="flex:1" onkeydown="if(event.key==='Enter')runSearch()">
+      <button class="btn btn-pri" onclick="runSearch()">검색</button>
+    </div>
+    <div id="searchResult"></div>
+  </div>
+</div>
+
+<!-- CRF 수정 사유 모달 -->
+<div class="mo" id="amendModal">
+  <div class="mo-box" style="width:560px">
+    <button class="mo-close" onclick="closeAmend()">✕</button>
+    <h2>✏️ 수정 사유 입력 (추적 기록)</h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">이 CRF는 이미 <b>최종 제출</b>된 건입니다. 수정 내용을 추적하기 위해 사유와 수정자를 기록해 주세요.</div>
+    <div class="frow"><div class="fg full"><label class="fl">수정 사유<span class="req">*</span></label><textarea id="amendReason" placeholder="예: 검사 수치 오기입 정정"></textarea></div></div>
+    <div class="frow"><div class="fg full"><label class="fl">수정자<span class="req">*</span></label><input type="text" id="amendBy" placeholder="이름"></div></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-out" onclick="closeAmend()">취소</button>
+      <button class="btn btn-pri" onclick="confirmAmend()">저장</button>
+    </div>
+  </div>
+</div>
+<script>
+/* CSS.escape 폴리필 (구형 브라우저 호환) */
+if(typeof CSS==='undefined'||!CSS.escape){window.CSS=window.CSS||{};window.CSS.escape=function(v){return String(v).replace(/[^a-zA-Z0-9_\u00A0-\uFFFF-]/g,function(c){return '\\'+c});};}
+
+/* ============================================================
+   Supabase 공용 저장소 연동
+   - 링크를 가진 모든 사람이 같은 데이터를 봄
+   - localStorage는 로컬 캐시로 유지(오프라인/동기 동작), 저장 시 클라우드에도 반영
+   ============================================================ */
+const SB_URL='https://yyxdbtjmybibiwfhdloz.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5eGRidGpteWJpYml3ZmhkbG96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNDA4NDEsImV4cCI6MjA5NjgxNjg0MX0.DV9PatwYNJAK49SzWMKf5CN5OcIrtCBdeJOHsim3EW4';
+const SB_TABLE='responses';
+const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+let cloudOK=false; // 연결 가능 여부
+function sbUrl(path){return SB_URL.replace(/\/$/,'').replace(/\/rest\/v1$/,'')+'/rest/v1'+path;}
+
+// 레코드를 cloud row 형태로
+function toRow(rec){
+ const type=rec._visitType||'crf';
+ const id=type==='crf'?('crf_'+(rec._studyId||rec._subjectId)):(type+'_'+rec._recId);
+ return {
+  id:id, survey_type:type,
+  study_id:rec._studyId||null, reg_id:rec._regId||null, name:rec._visitName||null,
+  created_at:rec._createdAt||null, modified_at:rec._lastModifiedAt||null,
+  visit_date:rec._visitDate||null, status:rec._status||null,
+  data:rec
+ };
+}
+// 클라우드에 upsert (저장)
+async function cloudUpsert(rec){
+ try{
+  const row=toRow(rec);
+  const res=await fetch(sbUrl('/'+SB_TABLE),{method:'POST',headers:Object.assign({},SB_HEADERS,{'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(row)});
+  cloudOK=res.ok;return res.ok;
+ }catch(e){cloudOK=false;return false;}
+}
+// 클라우드에서 삭제
+async function cloudDelete(type,localId){
+ try{
+  const id=type==='crf'?('crf_'+localId):(type+'_'+localId);
+  await fetch(sbUrl('/'+SB_TABLE+'?id=eq.'+encodeURIComponent(id)),{method:'DELETE',headers:SB_HEADERS});
+ }catch(e){}
+}
+// 클라우드 전체 가져오기 → localStorage 캐시 갱신
+async function cloudPullAll(){
+ try{
+  const res=await fetch(sbUrl('/'+SB_TABLE+'?select=*&order=updated.asc'),{headers:SB_HEADERS});
+  if(!res.ok){cloudOK=false;return false;}
+  cloudOK=true;
+  const rows=await res.json();
+  // 로컬 캐시 재구성
+  const crfIdx=[],initIdx=[],fuIdx=[];
+  rows.forEach(row=>{
+   const rec=row.data;if(!rec)return;
+   if(row.survey_type==='crf'){const sid=rec._studyId||rec._subjectId;if(sid){localStorage.setItem('crf_fi_'+sid,JSON.stringify(rec));if(!crfIdx.includes(sid))crfIdx.push(sid);}}
+   else{const mode=row.survey_type,rid=rec._recId;if(rid){localStorage.setItem('visit_'+mode+'_'+rid,JSON.stringify(rec));(mode==='init'?initIdx:fuIdx).push(rid);}}
+  });
+  localStorage.setItem(IDX_KEY,JSON.stringify(crfIdx));
+  localStorage.setItem('visit_init_index',JSON.stringify(initIdx));
+  localStorage.setItem('visit_fu_index',JSON.stringify(fuIdx));
+  return true;
+ }catch(e){cloudOK=false;return false;}
+}
+function setCloudStatus(){
+ const el=document.getElementById('cloudStatus');if(!el)return;
+ el.innerHTML=cloudOK?'<span style="color:#6ee7b7">● 공용 저장소 연결됨</span>':'<span style="color:#fca5a5">● 오프라인(로컬 저장)</span>';
+}
+/* ============ 데이터 정의 ============ */
+const FIQOL_ITEMS=["밖에 외출하는 것이 두렵다","친구를 만나기가 싫다","집 밖에서 외박하는 것이 싫다","영화를 보러 나가거나, 교회, 절 등에 다니는 것이 어렵다","나가기 전에는 음식을 적게 먹어야 한다","집을 나오면, 항상 화장실 근처에 있으려고 한다","화장실 가는 습관에 맞춰 내 스케줄을 조정해야 한다","여행가는 것이 싫다","제 시간에 화장실을 못 갈까봐 걱정이 된다","나는 내가 변을 참지 못한다고 생각한다","나는 화장실에 갈 때 까지 변을 참지 못한다","내가 알지도 못하는 사이에 변이 나온다","나는 화장실 근처에 머물면서 변이 새지 않도록 노력한다","변이 새서 창피하다","나는 내가 원하는 많은 것을 할 수가 없다","나는 변이 샐까봐 걱정이다","나는 우울하다","다른 사람이 나에게서 똥냄새가 난다고 할까봐 걱정이 된다","나는 내가 건강하지 않다고 생각한다","나는 인생을 즐기지 못한다","나는 내가 원하는 것보다 성관계를 적게 갖는다","나는 다른 사람과 다르다고 느낀다","변이 새는 것이 항상 나의 걱정거리이다","나는 성관계를 갖는 것이 두렵다","나는 비행기나, 기차로 여행하고 싶지 않다","나는 외식하러 나가기가 싫다","나는 새로운 곳에 갈 때 마다 화장실이 어디에 있는지부터 살핀다"];
+const GDS_ITEMS=[["본인의 삶에 대체로 만족하십니까?",0],["최근에 활동이나 관심거리가 줄었습니까?",1],["삶이 공허하다고 느끼십니까?",1],["자주 싫증을 느끼십니까?",1],["기분좋게 사시는 편입니까?",0],["좋지 않은 일이 닥쳐올까 두렵습니까?",0],["대체로 행복하다고 느끼십니까?",0],["자주 무기력함을 느끼십니까?",1],["외출보다는 집안에 있기를 좋아하십니까?",1],["다른 사람들보다 기억력이 떨어진다고 느끼십니까?",1],["살아있다는 사실이 기쁘십니까?",0],["본인의 삶이 가치가 없다고 느끼십니까?",1],["생활에 활력이 넘치십니까?",0],["본인의 현실이 절망적이라고 느끼십니까?",1],["다른 사람들이 대체로 본인보다 낫다고 느끼십니까?",0]];
+const KFES_ITEMS=["집안 청소하기","옷 입기/벗기","간단한 음식준비하기","목욕이나 샤워하기","상점에 가기","의자에 앉거나 일어나기","계단 올라가거나 내려가기","주변 산책하기","손을 뻗거나 웅크리기","전화 받기","미끄러운 길을 걷기","친구/친척 방문하기","사람 많은 곳 가기","평탄하지 않은 길 걷기","경사진 곳 올라가거나 내려가기","외부(친목)행사 참가위해 외출하기"];
+const MMSE_ROWS=[
+ {k:"mmse1",t:"1. 올해는 몇 년도 입니까?"},{k:"mmse2",t:"2. 지금은 무슨 계절입니까?"},{k:"mmse3",t:"3. 오늘은 며칠입니까?"},{k:"mmse4",t:"4. 오늘은 무슨 요일입니까?"},{k:"mmse5",t:"5. 지금은 몇 월입니까?"},
+ {k:"mmse6",t:"6. 우리가 있는 이곳은 무슨 도/특별시/광역시입니까?"},{k:"mmse7",t:"7. 여기는 무슨 시/군/구입니까?"},{k:"mmse8",t:"8. 여기는 무슨 읍/면/동입니까?"},{k:"mmse9",t:"9. 우리는 지금 이 건물의 몇 층에 있습니까?"},{k:"mmse10",t:"10. 이 장소의 이름이 무엇입니까?"},
+ {hdr:"11. 세 가지 물건 즉시 회상 — 나무 · 자동차 · 모자"},
+ {k:"mmse11a",t:"&nbsp;&nbsp;나무"},{k:"mmse11b",t:"&nbsp;&nbsp;자동차"},{k:"mmse11c",t:"&nbsp;&nbsp;모자"},
+ {k:"mmse12",t:"12. '삼천리강산' 거꾸로 말하기",special:true},
+ {hdr:"13. 세 가지 물건 지연 회상"},
+ {k:"mmse13a",t:"&nbsp;&nbsp;나무"},{k:"mmse13b",t:"&nbsp;&nbsp;자동차"},{k:"mmse13c",t:"&nbsp;&nbsp;모자"},
+ {hdr:"14. 이름대기"},
+ {k:"mmse14a",t:"&nbsp;&nbsp;열쇠"},{k:"mmse14b",t:"&nbsp;&nbsp;도장"},
+ {k:"mmse15",t:"15. 따라 말하기 — '간장공장공장장'"},
+ {hdr:"16. 3단계 명령 수행"},
+ {k:"mmse16a",t:"&nbsp;&nbsp;오른손으로 받는다"},{k:"mmse16b",t:"&nbsp;&nbsp;반으로 접는다"},{k:"mmse16c",t:"&nbsp;&nbsp;무릎 위에 놓는다"},
+ {k:"mmse17",t:"17. 겹친 오각형 그리기"},
+ {k:"mmse18",t:"18. 옷은 왜 빨아서 입습니까?"},
+ {k:"mmse19",t:"19. 주민등록증을 주웠을 때 어떻게 주인에게 돌려주겠습니까?"}];
+const FFQ_ITEMS=[["식이섬유 함유 식품","잡곡(현미, 보리, 콩 등)","공기"],["","감자, 고구마","개"],["","콩류(두부, 콩나물 포함)","회분"],
+ ["채소류","녹색 채소(시금치, 브로콜리 등)","회분"],["","근채류(당근, 무 등)","회분"],["","김치류","회분"],
+ ["과일류","사과/배","개"],["","감귤류(귤, 오렌지 등)","개"],["","베리류(딸기, 블루베리 등)","컵"],
+ ["유산균 함유 식품","요구르트","개/컵"],["","치즈","조각"],["","발효유제품(케피어 등)","컵"],
+ ["프리바이오틱스 식품","마늘/양파","회분"],["","바나나","개"],["","아스파라거스","회분"],
+ ["발효식품","된장/고추장/청국장","회분"],["","식혜/막걸리","잔"],
+ ["지방 함유 식품","붉은 육류(소고기, 돼지고기)","회분"],["","가공육(햄, 소시지)","회분"],["","생선류","회분"],
+ ["기타","가당음료","잔/캔"],["","견과류","회분"],["","커피","잔"],["","차(녹차, 홍차 등)","잔"]];
+const FFQ_FREQ=["거의 안 먹음","월 1-3회","주 1-2회","주 3-4회","주 5-6회","일 1회","일 2회 이상"];
+const SUPP_ITEMS=["프로바이오틱스","프리바이오틱스","오메가-3","식이섬유 보충제","비타민 D","기타"];
+const CHK_ITEMS=["기본 정보 및 인구사회학적 정보","건강 관련 정보","대변실금 평가","신체활동 평가","장내 미생물 검체 수집","근골격계 지표 평가","공변량 및 기타 평가"];
+
+/* ============ 동적 렌더링 ============ */
+function radioCells(name,vals){return vals.map(v=>`<td><input type="radio" name="${name}" value="${v}"></td>`).join('')}
+function renderTables(){
+ document.getElementById('fiqolTb').innerHTML=FIQOL_ITEMS.map((t,i)=>`<tr><td>${i+1}. ${t}</td>${radioCells('fq'+(i+1),[1,2,3,4])}</tr>`).join('');
+ document.getElementById('gdsTb').innerHTML=GDS_ITEMS.map((it,i)=>{const y=it[1],n=y?0:1;return `<tr><td>${i+1}. ${it[0]}</td><td><label style="cursor:pointer"><input type="radio" name="gds${i+1}" value="${y}"> 예(${y})</label></td><td><label style="cursor:pointer"><input type="radio" name="gds${i+1}" value="${n}"> 아니오(${n})</label></td></tr>`}).join('');
+ document.getElementById('kfesTb').innerHTML=KFES_ITEMS.map((t,i)=>`<tr><td>${i+1}. ${t}</td>${radioCells('kfes'+(i+1),[1,2,3,4])}</tr>`).join('');
+ document.getElementById('mmseTb').innerHTML=MMSE_ROWS.map(r=>{
+  if(r.hdr)return `<tr><td colspan="4" style="background:#eef2ff;font-weight:700;text-align:left">${r.hdr}</td></tr>`;
+  if(r.special)return `<tr><td style="text-align:left">${r.t}</td><td><label style="cursor:pointer"><input type="radio" name="${r.k}" value="0"> 틀림(0)</label></td><td colspan="2"><label style="cursor:pointer"><input type="radio" name="${r.k}" value="5"> 맞음(5)</label></td></tr>`;
+  return `<tr><td style="text-align:left">${r.t}</td>${radioCells(r.k,[0,1,9])}</tr>`}).join('');
+ // 7일 신체활동(9일) & 배변일기(7일)
+ document.getElementById('paTb').innerHTML=Array.from({length:9},(_,x)=>{const d=x+1,lbl=d===1?'1일차 (배부)':d===9?'9일차 (반납)':d+'일차';
+  return `<tr><td>${lbl}</td><td><input type="date" id="pa${d}_date"${d===1?' onchange="autofillDates(this,\'pa\',9)"':''}></td><td><select id="pa${d}_wear"><option value=""></option><option>O</option><option>X</option></select></td><td><input type="text" id="pa${d}_sed"></td><td><input type="text" id="pa${d}_mvpa"></td><td><input type="text" id="pa${d}_other"></td><td><input type="text" id="pa${d}_note"></td></tr>`}).join('');
+ document.getElementById('bdTb').innerHTML=Array.from({length:7},(_,x)=>{const d=x+1;
+  return `<tr><td>${d}일차</td><td><input type="date" id="bd${d}_date"${d===1?' onchange="autofillDates(this,\'bd\',7)"':''}></td><td><input type="number" id="bd${d}_freq" min="0"></td><td><select id="bd${d}_bristol"><option value=""></option>${[1,2,3,4,5,6,7].map(b=>`<option>${b}형</option>`).join('')}</select></td><td><input type="number" id="bd${d}_fi" min="0"></td><td><select id="bd${d}_fitype"><option value=""></option><option>가스</option><option>점액</option><option>액체</option><option>고형</option><option>복합</option></select></td><td><input type="text" id="bd${d}_situ"></td><td><input type="text" id="bd${d}_diet"></td></tr>`}).join('');
+ // 24HR 7일 탭
+ document.getElementById('hrTabs').innerHTML=Array.from({length:7},(_,x)=>`<button class="day-tab${x===0?' active':''}" onclick="hrGo(${x+1})" id="hrtab${x+1}">${x+1}일차</button>`).join('');
+ const meals=[["b","아침 식사","예: 7:30"],["l","점심 식사","예: 12:30"],["d","저녁 식사","예: 18:30"],["s","간식","예: 15:00, 21:00"]];
+ document.getElementById('hrPanels').innerHTML=Array.from({length:7},(_,x)=>{const d=x+1;
+  return `<div class="day-panel${x===0?' active':''}" id="hrpanel${d}">
+  <div class="card"><div class="card-hd">${d}일차 기본 정보</div><div class="card-bd">
+    <div class="frow"><div class="fg third"><label class="fl">날짜</label><input type="date" id="hr${d}_date"${d===1?' onchange="autofillDates(this,\'hr\',7)"':''}></div>
+    <div class="fg" style="flex:2"><label class="fl">오늘이 평소와 비교하여</label>
+      <div class="rg"><label><input type="radio" name="hr${d}_cmp" value="평소와 비슷한 식사">평소와 비슷</label><label><input type="radio" name="hr${d}_cmp" value="평소보다 많이 먹음">많이 먹음</label><label><input type="radio" name="hr${d}_cmp" value="평소보다 적게 먹음">적게 먹음</label><label><input type="radio" name="hr${d}_cmp" value="특별한 날의 식사">특별한 날</label></div></div></div>
+  </div></div>
+  <div class="card"><div class="card-hd">가) 상세 식품 섭취 기록</div><div class="card-bd" style="overflow-x:auto">
+    <table class="tbl" style="min-width:860px"><thead><tr><th width="13%">식사 구분</th><th width="13%">시간</th><th width="15%">장소</th><th>음식명</th><th width="13%">분량(몇 인분)</th><th width="18%">특이사항</th></tr></thead><tbody>
+    ${meals.map(m=>`<tr><td>${m[1]}<br><span style="font-size:10px;color:#718096">${m[2]}</span></td><td><input type="text" id="hr${d}_${m[0]}_time"></td><td><input type="text" id="hr${d}_${m[0]}_place"></td><td><input type="text" id="hr${d}_${m[0]}_food"></td><td><input type="text" id="hr${d}_${m[0]}_amt"></td><td><input type="text" id="hr${d}_${m[0]}_note"></td></tr>`).join('')}
+    </tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">나) 식사 관련 특이사항</div><div class="card-bd">
+    <div class="frow"><div class="fg third"><label class="fl">수분 섭취량 (물, 차 등)</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="hr${d}_water" min="0" style="width:120px"><span class="unit">ml</span></div></div>
+    <div class="fg"><label class="fl">식이 보충제 섭취 여부</label><div class="rg"><label><input type="radio" name="hr${d}_supp" value="없음">없음</label><label><input type="radio" name="hr${d}_supp" value="있음">있음</label><input type="text" id="hr${d}_supp_type" placeholder="종류" style="width:130px"><input type="text" id="hr${d}_supp_amt" placeholder="섭취량" style="width:100px"></div></div></div>
+    <div class="frow"><div class="fg"><label class="fl">배변 상태</label><div class="rg"><label><input type="radio" name="hr${d}_bowel" value="정상">정상</label><label><input type="radio" name="hr${d}_bowel" value="설사">설사</label><label><input type="radio" name="hr${d}_bowel" value="변비">변비</label><label><input type="radio" name="hr${d}_bowel" value="기타">기타</label><input type="text" id="hr${d}_bowel_etc" placeholder="기타 내용" style="width:130px"></div></div>
+    <div class="fg"><label class="fl">소화불량/속쓰림 여부</label><div class="rg"><label><input type="radio" name="hr${d}_dysp" value="없음">없음</label><label><input type="radio" name="hr${d}_dysp" value="경미함">경미함</label><label><input type="radio" name="hr${d}_dysp" value="중등도">중등도</label><label><input type="radio" name="hr${d}_dysp" value="심함">심함</label></div></div></div>
+  </div></div></div>`}).join('');
+ // FFQ
+ document.getElementById('ffqTb').innerHTML=FFQ_ITEMS.map((it,i)=>`<tr><td style="font-weight:700">${it[0]}</td><td style="text-align:left">${it[1]}</td>${radioCells('ffq'+(i+1),FFQ_FREQ)}<td><div style="display:flex;align-items:center;gap:3px"><input type="number" id="ffq${i+1}_amt" step="0.5" min="0"><span style="font-size:10px;white-space:nowrap">${it[2]}</span></div></td></tr>`).join('');
+ document.getElementById('suppTb').innerHTML=SUPP_ITEMS.map((t,i)=>`<tr><td>${t}${t==='기타'?' <input type="text" id="supp'+(i+1)+'_name" placeholder="유형" style="width:110px">':''}</td><td><div class="yn"><label><input type="radio" name="supp${i+1}_use" value="예">예</label><label><input type="radio" name="supp${i+1}_use" value="아니오">아니오</label></div></td><td><input type="text" id="supp${i+1}_freq"></td><td><input type="text" id="supp${i+1}_brand"></td><td><input type="text" id="supp${i+1}_period"></td></tr>`).join('');
+ document.getElementById('chkTb').innerHTML=CHK_ITEMS.map((t,i)=>`<tr><td>${t}</td><td><input type="radio" name="chk${i+1}" value="완료"></td><td><input type="radio" name="chk${i+1}" value="미완료"></td><td><input type="text" id="chk${i+1}_reason"></td></tr>`).join('');
+ // 질환 진단 테이블
+ const DIAG_ITEMS=[["심혈관계","고혈압"],["심혈관계","이상지질혈증 (고지혈증)"],["심혈관계","뇌혈관질환"],["심혈관계","관상동맥질환"],["심혈관계","심근경색"],["심혈관계","협심증"],["내분비계","갑상선 질환"],["내분비계","당뇨병"],["근골격계","골관절염"],["근골격계","류머티스 관절염"],["근골격계","골다공증"],["근골격계","허리 통증/좌골신경통"],["근골격계","목 디스크"],["암","암 (종류 기재)"],["기타","기타 질환 1"],["기타","기타 질환 2"]];
+ let prevCat='';
+ document.getElementById('diagTb').innerHTML=DIAG_ITEMS.map((it,i)=>{
+  const n=i+1;let hdr='';
+  if(it[0]!==prevCat){hdr=`<tr><td colspan="4" style="background:#eef2ff;font-weight:700;text-align:left">${it[0]}</td></tr>`;prevCat=it[0];}
+  const nameCell=(it[0]==='암'||it[0]==='기타')?`${it[1]}<br><input type="text" id="diag${n}_name" placeholder="${it[0]==='암'?'암 종류':'질환명'}" style="width:130px;margin-top:3px">`:it[1];
+  return hdr+`<tr><td style="text-align:left">${nameCell}</td><td><div class="yn"><label><input type="radio" name="diag${n}_dx" value="예">예</label><label><input type="radio" name="diag${n}_dx" value="아니오">아니오</label></div></td><td><div class="yn"><label><input type="radio" name="diag${n}_tx" value="예">예</label><label><input type="radio" name="diag${n}_tx" value="아니오">아니오</label></div></td><td><input type="text" id="diag${n}_when" placeholder="예: 2015년" style="width:90px"></td></tr>`;
+ }).join('')+`<tr><td colspan="4" style="text-align:left"><label style="cursor:pointer"><input type="checkbox" id="diag_none" value="해당사항 없음"> 해당사항 없음 (진단받은 질환 없음)</label></td></tr>`;
+}
+
+/* ============ 네비게이션 ============ */
+function go(id){
+ document.querySelectorAll('.sec-pg').forEach(p=>p.classList.remove('active'));
+ document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ const nv=document.getElementById('nav-'+id);if(nv)nv.classList.add('active');
+ document.getElementById('main').scrollTop=0;
+}
+function hrGo(d){
+ document.querySelectorAll('#hrTabs .day-tab').forEach(t=>t.classList.remove('active'));
+ document.querySelectorAll('#hrPanels .day-panel').forEach(p=>p.classList.remove('active'));
+ document.getElementById('hrtab'+d).classList.add('active');
+ document.getElementById('hrpanel'+d).classList.add('active');
+}
+/* 첫 날짜 입력 시 나머지 날짜 자동 채움 (prefix: pa/bd/hr, n: 총 일수) */
+function autofillDates(el,prefix,n){
+ const base=el.value;if(!base)return;
+ const [y,m,dd]=base.split('-').map(Number);
+ for(let i=2;i<=n;i++){
+  const t=new Date(y,m-1,dd);t.setDate(t.getDate()+(i-1));
+  const f=document.getElementById(prefix+i+'_date');
+  if(f)f.value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+ }
+ dirty=true;
+}
+
+/* ============ 점수 계산 ============ */
+const rv=n=>{const e=document.querySelector(`input[name="${n}"]:checked`);return e?e.value:null};
+function setInterp(el,txt,cls){const e=document.getElementById(el);if(!e)return;e.innerHTML=txt?`<span class="si ${cls}">${txt}</span>`:''}
+function calcElig(){
+ const inc=[1,2,3,4,5].map(i=>rv('inc'+i)),exc=[1,2,3,4,5,6,7].map(i=>rv('exc'+i));
+ const e=document.getElementById('eligRes');if(!e)return;
+ if(inc.some(v=>!v)||exc.some(v=>!v)){e.innerHTML='<span class="si" style="background:#e2e8f0;color:#4a5568">모든 항목 입력 시 자동 판정됩니다</span>';return}
+ const ok=inc.every(v=>v==='예')&&exc.every(v=>v==='아니오');
+ e.innerHTML=ok?'<span class="si si-n" style="font-size:14px">✅ 적격 — 연구 참여 가능</span>':'<span class="si si-sv" style="font-size:14px">❌ 부적격 — 선정/제외기준 미충족</span>';
+}
+function calcADL(){
+ const vals=[1,2,3,4,5,6,7].map(i=>rv('adl'+i));if(vals.some(v=>!v)){document.getElementById('adlScore').textContent='-';return}
+ const s=vals.reduce((a,b)=>a+ +b,0);document.getElementById('adlScore').textContent=s;
+ document.getElementById('adlInterp').textContent=s===7?'완전 독립':s<16?'독립적 보행 가능 (선정기준 충족)':'의존도 높음 (선정기준: 16점 미만)';
+}
+function calcFISI(){
+ const ks=['fisi_gas','fisi_mucus','fisi_loose','fisi_solid'].map(rv);if(ks.some(v=>v===null)){document.getElementById('fisiScore').textContent='-';setInterp('fisiInterp','','');return}
+ const s=ks.reduce((a,b)=>a+ +b,0);document.getElementById('fisiScore').textContent=s;
+ if(s===0)setInterp('fisiInterp','정상 (실금 없음)','si-n');else if(s<=20)setInterp('fisiInterp','경도 (mild)','si-mi');else if(s<=40)setInterp('fisiInterp','중등도 (moderate)','si-mo');else setInterp('fisiInterp','중증 (severe)','si-sv');
+}
+function calcWexner(){
+ const ks=[1,2,3,4,5].map(i=>rv('wex'+i));if(ks.some(v=>v===null)){document.getElementById('wexnerScore').textContent='-';setInterp('wexnerInterp','','');return}
+ const s=ks.reduce((a,b)=>a+ +b,0);document.getElementById('wexnerScore').textContent=s;
+ setInterp('wexnerInterp',s===0?'정상':s<=9?'경도~중등도':'중증 경향','s'===0?'si-n':s===0?'si-n':s<=9?'si-mi':'si-sv');
+}
+function calcFIQOL(){
+ const ks=FIQOL_ITEMS.map((_,i)=>rv('fq'+(i+1)));const ans=ks.filter(v=>v!==null);
+ document.getElementById('fiqolScore').textContent=ans.length?ks.reduce((a,b)=>a+(+b||0),0)+(ans.length<27?` (${ans.length}/27)`:''):'-';
+}
+function calcMMSE(){
+ const keys=MMSE_ROWS.filter(r=>r.k).map(r=>r.k);let s=0,answered=0;
+ keys.forEach(k=>{const v=rv(k);if(v!==null){answered++;if(v!=='9')s+=+v}});
+ document.getElementById('mmseScore').textContent=answered?s:'-';
+ if(answered)setInterp('mmseInterp',`총 ${s}/30점 (9 제외 합산)`,s>=24?'si-n':s>=18?'si-mi':'si-sv');
+}
+function calcGDS(){
+ const ks=GDS_ITEMS.map((_,i)=>rv('gds'+(i+1)));if(ks.some(v=>v===null)){document.getElementById('gdsScore').textContent='-';setInterp('gdsInterp','','');return}
+ const s=ks.reduce((a,b)=>a+ +b,0);document.getElementById('gdsScore').textContent=s;
+ if(s<=5)setInterp('gdsInterp','정상 (0-5점)','si-n');else if(s<=9)setInterp('gdsInterp','중증도 (6-9점)','si-mo');else setInterp('gdsInterp','우울증 (10-15점)','si-sv');
+}
+function calcKFES(){
+ const ks=KFES_ITEMS.map((_,i)=>rv('kfes'+(i+1)));if(ks.some(v=>v===null)){document.getElementById('kfesScore').textContent='-';setInterp('kfesInterp','','');return}
+ const s=ks.reduce((a,b)=>a+ +b,0);document.getElementById('kfesScore').textContent=s;
+ if(s<=27)setInterp('kfesInterp','낮은 낙상 위험성 (16-27점)','si-n');else if(s<=44)setInterp('kfesInterp','중등도 낙상 위험성 (28-44점)','si-mo');else setInterp('kfesInterp','높은 낙상 위험성 (45-64점)','si-sv');
+}
+function calcSPPB(){
+ const ids=['sppb_bal','sppb_gait','sppb_chair'].map(i=>document.getElementById(i).value);
+ if(ids.some(v=>v==='')){document.getElementById('sppbScore').textContent='-';setInterp('sppbInterp','','');return}
+ const s=ids.reduce((a,b)=>a+ +b,0);document.getElementById('sppbScore').textContent=s;
+ if(s<=3)setInterp('sppbInterp','심각한 제한 (0-3점)','si-sv');else if(s<=6)setInterp('sppbInterp','중등도 제한 (4-6점)','si-mo');else if(s<=9)setInterp('sppbInterp','경도 제한 (7-9점)','si-mi');else setInterp('sppbInterp','최소 제한 (10-12점)','si-n');
+}
+function recalcAll(){calcElig();calcADL();calcFISI();calcWexner();calcFIQOL();calcMMSE();calcGDS();calcKFES();calcSPPB()}
+
+/* ============ 데이터 직렬화 ============ */
+function collectData(){
+ const data={};
+ document.querySelectorAll('#view-crf input, #view-crf select, #view-crf textarea').forEach(el=>{
+  if(el.type==='radio'){if(el.checked)data['r:'+el.name]=el.value;else if(!(('r:'+el.name)in data))data['r:'+el.name]=data['r:'+el.name]||'';}
+  else if(el.type==='checkbox'){if(!el.name&&!el.id)return;const key='c:'+(el.id||el.name+':'+el.value);data[key]=el.checked?(el.value||'1'):'';}
+  else if(el.id){data['i:'+el.id]=el.value;}
+ });
+ return data;
+}
+function applyData(data){
+ clearFields(false);
+ Object.entries(data).forEach(([k,v])=>{
+  if(k.startsWith('i:')){const el=document.getElementById(k.slice(2));if(el)el.value=v;}
+  else if(k.startsWith('r:')){if(v===''||v==null)return;const el=document.querySelector(`#view-crf input[name="${CSS.escape(k.slice(2))}"][value="${CSS.escape(v)}"]`);if(el)el.checked=true;}
+  else if(k.startsWith('c:')){const id=k.slice(2);const el=document.getElementById(id)||document.querySelector(`#view-crf input[name="${CSS.escape(id.split(':')[0])}"][value="${CSS.escape(id.split(':')[1]||'')}"]`);if(el)el.checked=!!v;}
+ });
+ recalcAll();
+}
+function clearFields(resetScores=true){
+ document.querySelectorAll('#view-crf input, #view-crf select, #view-crf textarea').forEach(el=>{
+  if(el.type==='radio'||el.type==='checkbox')el.checked=false;
+  else el.value=(el.id==='mb_temp')?'-80°C':'';
+ });
+ if(resetScores)recalcAll();
+}
+
+/* ============ 저장 / 불러오기 (localStorage) — CRF는 연구번호(studyId) 기준 ============ */
+const IDX_KEY='crf_fi_index';
+function getIndex(){try{return JSON.parse(localStorage.getItem(IDX_KEY))||[]}catch(e){return[]}}
+function setIndex(x){localStorage.setItem(IDX_KEY,JSON.stringify(x))}
+let dirty=false;
+let crfLoadedStatus=null; // 현재 불러온 CRF의 상태(final이면 수정 시 사유 필요)
+const nowStr=()=>new Date().toLocaleString('ko-KR');
+
+function crfMeta(studyId){ // 기존 저장본의 메타 반환
+ try{return JSON.parse(localStorage.getItem('crf_fi_'+studyId))}catch(e){return null}
+}
+function doCrfSave(opts){ // opts:{final, amend:{reason,by}}
+ const studyId=document.getElementById('studyId').value.trim();
+ if(!studyId){toast('⚠️ 좌측 상단에 연구번호를 먼저 입력하세요');document.getElementById('studyId').focus();return false;}
+ const regId=document.getElementById('crf_regId').value.trim();
+ const prev=crfMeta(studyId);
+ const data=collectData();
+ data['_studyId']=studyId;
+ data['_regId']=regId;
+ data['_createdAt']=prev&&prev._createdAt?prev._createdAt:nowStr();
+ data['_lastModifiedAt']=nowStr();
+ data['_savedAt']=data['_lastModifiedAt']; // 호환
+ data['_subjectId']=studyId; // CSV 호환
+ // 상태: 최종제출이면 final, 아니면 기존 상태 유지(없으면 draft)
+ data['_status']=opts.final?'final':(prev&&prev._status?prev._status:'draft');
+ // 수정 이력
+ let amends=(prev&&prev._amendments)?prev._amendments.slice():[];
+ if(opts.amend){amends.push({at:nowStr(),reason:opts.amend.reason,by:opts.amend.by});}
+ data['_amendments']=amends;
+ try{localStorage.setItem('crf_fi_'+studyId,JSON.stringify(data));}catch(e){toast('❌ 저장 실패: 저장공간 부족');return false;}
+ const idx=getIndex();if(!idx.includes(studyId)){idx.push(studyId);setIndex(idx);}
+ dirty=false;crfLoadedStatus=data['_status'];
+ updateCrfMetaBanner(data);
+ // 클라우드 동기화
+ cloudUpsert(data).then(ok=>{setCloudStatus();if(!ok)toast('⚠️ 로컬 저장됨 (공용 저장소 연결 실패 — 인터넷 확인)');});
+ toast(opts.final?'✅ 최종 제출 완료 ('+studyId+')':'💾 저장 완료 ('+studyId+')');
+ return true;
+}
+// 일반 저장 버튼 (CRF): 최종제출 건을 수정한 경우에만 사유 요구
+function saveData(final){
+ const studyId=document.getElementById('studyId').value.trim();
+ const prev=crfMeta(studyId);
+ if(prev&&prev._status==='final'&&!final){
+  // 최종제출된 건을 불러와 수정 후 저장 → 사유 모달
+  openAmend();return;
+ }
+ doCrfSave({final:!!final});
+}
+function crfFinalSubmit(){
+ const studyId=document.getElementById('studyId').value.trim();
+ if(!studyId){toast('⚠️ 연구번호를 입력하세요');document.getElementById('studyId').focus();return;}
+ const prev=crfMeta(studyId);
+ if(prev&&prev._status==='final'){
+  // 이미 최종제출 → 재수정 제출도 사유 기록
+  openAmend(true);return;
+ }
+ if(!confirm('최종 제출하시겠습니까?\n제출 후 수정 시에는 수정 사유 기록이 필요합니다.'))return;
+ doCrfSave({final:true});
+}
+// 수정 사유 모달
+let amendIsFinal=false;
+function openAmend(isFinal){amendIsFinal=!!isFinal;document.getElementById('amendReason').value='';document.getElementById('amendBy').value='';document.getElementById('amendModal').classList.add('open');}
+function closeAmend(){document.getElementById('amendModal').classList.remove('open');}
+function confirmAmend(){
+ const reason=document.getElementById('amendReason').value.trim();
+ const by=document.getElementById('amendBy').value.trim();
+ if(!reason||!by){toast('⚠️ 수정 사유와 수정자를 모두 입력하세요');return;}
+ closeAmend();
+ doCrfSave({final:amendIsFinal||true, amend:{reason,by}}); // 최종제출 건 수정은 final 유지
+}
+function loadData(studyId){
+ const raw=localStorage.getItem('crf_fi_'+studyId);if(!raw){toast('❌ 저장된 응답이 없습니다');return}
+ const data=JSON.parse(raw);
+ applyData(data);
+ document.getElementById('studyId').value=data._studyId||studyId;
+ document.getElementById('crf_regId').value=data._regId||'';
+ crfLoadedStatus=data._status||'draft';
+ updateCrfMetaBanner(data);
+ closeMgr();dirty=false;
+ toast('📂 불러오기 완료 ('+studyId+')'+(crfLoadedStatus==='final'?' — 최종제출 건: 수정 시 사유 기록됩니다':''));
+}
+function deleteData(studyId){
+ if(!confirm(`연구번호 [${studyId}] CRF를 삭제할까요? 되돌릴 수 없습니다.`))return;
+ localStorage.removeItem('crf_fi_'+studyId);setIndex(getIndex().filter(x=>x!==studyId));
+ cloudDelete('crf',studyId);
+ renderRecList();toast('🗑️ 삭제 완료');
+}
+function clearForm(){
+ if(!confirm('현재 화면의 모든 입력을 초기화할까요?\n(저장된 응답은 삭제되지 않습니다)'))return;
+ clearFields();document.getElementById('studyId').value='';document.getElementById('crf_regId').value='';
+ crfLoadedStatus=null;dirty=false;updateCrfMetaBanner(null);
+ go('s0');toast('🔄 입력 화면 초기화 완료');
+}
+// CRF 첫 페이지 작성정보 배너 갱신
+function updateCrfMetaBanner(data){
+ const el=document.getElementById('crfMetaBanner');if(!el)return;
+ if(!data){el.innerHTML='<div class="meta-item"><span class="meta-label">상태</span><span class="meta-val"><span class="status-badge status-draft">미저장</span></span></div><div class="meta-item"><span class="meta-label">안내</span><span class="meta-val" style="font-weight:400;font-size:13px">저장 시 작성일이 기록됩니다</span></div>';return;}
+ const st=data._status==='final'?'<span class="status-badge status-final">최종 제출</span>':'<span class="status-badge status-draft">작성 중(임시저장)</span>';
+ let amendHtml='';
+ if(data._amendments&&data._amendments.length){
+  amendHtml=`<div class="amend-log" style="flex-basis:100%"><h4>✏️ 수정 이력 (${data._amendments.length}건)</h4>`+
+   data._amendments.map(a=>`<div class="ae"><b>${a.at}</b> — ${a.reason} <span style="color:#92400e">(${a.by})</span></div>`).join('')+`</div>`;
+ }
+ el.innerHTML=`<div class="meta-item"><span class="meta-label">연구번호</span><span class="meta-val">${data._studyId||'-'}</span></div>
+  <div class="meta-item"><span class="meta-label">등록번호</span><span class="meta-val">${data._regId||'-'}</span></div>
+  <div class="meta-item"><span class="meta-label">최초 작성일</span><span class="meta-val col-date" style="color:#0d9488">${data._createdAt||'-'}</span></div>
+  <div class="meta-item"><span class="meta-label">최종 수정일</span><span class="meta-val col-date" style="color:#0d9488">${data._lastModifiedAt||'-'}</span></div>
+  <div class="meta-item"><span class="meta-label">상태</span><span class="meta-val">${st}</span></div>${amendHtml}`;
+}
+// 등록번호 입력 시(CRF) — 해당 등록번호 설문 자동 연동(초진 우선, 재진 여러건이면 검색모달 안내)
+function onCrfRegChange(){
+ const reg=document.getElementById('crf_regId').value.trim();
+ if(!reg)return;
+ const inits=(typeof findVisitsByReg==='function')?findVisitsByReg('init',reg):[];
+ const fus=(typeof findVisitsByReg==='function')?findVisitsByReg('fu',reg):[];
+ if(!inits.length&&!fus.length)return;
+ // 초진 1건만 있으면 자동 연동, 그 외(재진 여러 건 등)는 검색 모달로
+ if(inits.length===1&&!fus.length){applyVisitToCRF(inits[0]);toast('🔗 초진 설문에서 공통 항목 연동됨');}
+ else{toast('🔍 이 등록번호로 여러 설문이 있습니다 — 검색 창에서 선택하세요');openSearch();}
+}
+// 자동 저장 (30초) — 연구번호 기준, 최종제출 건은 자동저장 안 함(사유 필요하므로)
+setInterval(()=>{const studyId=document.getElementById('studyId')?document.getElementById('studyId').value.trim():'';
+ if(currentMode==='crf'&&studyId&&dirty){const prev=crfMeta(studyId);if(!(prev&&prev._status==='final'))doCrfSave({final:false});}
+},30000);
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+
+/* ============ 응답 관리 모달 ============ */
+function openMgr(){renderRecList();document.getElementById('mgrModal').classList.add('open')}
+function closeMgr(){document.getElementById('mgrModal').classList.remove('open')}
+function renderRecList(){
+ const box=document.getElementById('recList');
+ const crfIdx=getIndex(),initIdx=(typeof getVisitIdx==='function'?getVisitIdx('init'):[]),fuIdx=(typeof getVisitIdx==='function'?getVisitIdx('fu'):[]);
+ let html='';
+ const section=(title,idx,type)=>{
+  if(!idx.length)return `<div style="font-size:12px;font-weight:700;color:#4a5568;margin:14px 0 6px">${title} <span style="color:#a0aec0;font-weight:400">(0건)</span></div>`;
+  let rows=idx.map(sid=>{
+   let meta={};try{const key=type==='crf'?'crf_fi_'+sid:'visit_'+type+'_'+sid;meta=JSON.parse(localStorage.getItem(key))||{}}catch(e){}
+   const created=meta._createdAt||meta._visitDate||meta._savedAt||'';
+   const idLabel=type==='crf'?(meta._studyId||sid)+(meta._regId?' · 등록 '+meta._regId:''):(meta._visitName?meta._visitName+' · ':'')+sid;
+   const status=type==='crf'&&meta._status==='final'?'<span class="status-badge status-final" style="margin-left:6px">최종</span>':(type==='crf'?'<span class="status-badge status-draft" style="margin-left:6px">작성중</span>':'');
+   const loadFn=type==='crf'?`loadData('${sid.replace(/'/g,"\\'")}')`:`loadVisitFromMgr('${type}','${sid.replace(/'/g,"\\'")}')`;
+   const delFn=type==='crf'?`deleteData('${sid.replace(/'/g,"\\'")}')`:`deleteVisit('${type}','${sid.replace(/'/g,"\\'")}')`;
+   return `<div class="rec-item"><span class="rec-id">${idLabel}${status}</span><span class="rec-date">📅 ${created}</span>
+    <button class="btn btn-out" style="padding:5px 12px;font-size:12px" onclick="${loadFn}">불러오기</button>
+    <button class="btn" style="padding:5px 12px;font-size:12px;background:#fee2e2;color:#991b1b" onclick="${delFn}">삭제</button></div>`;
+  }).join('');
+  return `<div style="font-size:12px;font-weight:700;color:#4a5568;margin:14px 0 6px">${title} <span style="color:#a0aec0;font-weight:400">(${idx.length}건)</span></div>${rows}`;
+ };
+ html+=section('📋 CRF 응답 (연구번호 기준)',crfIdx,'crf');
+ html+=section('🩺 초진 외래 설문',initIdx,'init');
+ html+=section('🔁 재진 외래 설문',fuIdx,'fu');
+ box.innerHTML=html;
+}
+
+/* ============ CSV 추출 ============ */
+function labelOf(k){
+ const map={_createdAt:'최초작성일',_lastModifiedAt:'최종수정일',_savedAt:'저장일시',_studyId:'연구번호',_regId:'등록번호',_subjectId:'식별번호',_visitName:'이름',_visitDate:'설문작성일',_status:'상태',_visitType:'설문종류',_amendments:'수정이력'};
+ if(map[k])return map[k];
+ return k.replace(/^[irc]:/,'');
+}
+function csvCell(v){if(v&&typeof v==='object')v=JSON.stringify(v);v=(v==null?'':String(v));return '"'+v.replace(/"/g,'""')+'"'}
+// 날짜/식별자 우선 컬럼 순서
+const FRONT_KEYS=['_createdAt','_visitDate','_lastModifiedAt','_savedAt','_studyId','_regId','_subjectId','_visitName','_visitType','_status'];
+function buildCSV(records){
+ const keySet=new Set();
+ records.forEach(r=>Object.keys(r).forEach(k=>keySet.add(k)));
+ const rest=[...keySet].filter(k=>!FRONT_KEYS.includes(k));
+ const keys=[...FRONT_KEYS.filter(k=>keySet.has(k)),...rest];
+ const head=keys.map(labelOf).map(csvCell).join(',');
+ const rows=records.map(r=>keys.map(k=>csvCell(r[k])).join(','));
+ return '\uFEFF'+head+'\n'+rows.join('\n');
+}
+function downloadCSV(text,name){
+ const blob=new Blob([text],{type:'text/csv;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+ URL.revokeObjectURL(a.href);
+}
+function exportCSV(){
+ const studyId=(document.getElementById('studyId')?document.getElementById('studyId').value.trim():'')||'무기명';
+ const data=collectData();data['_studyId']=studyId;data['_regId']=document.getElementById('crf_regId').value.trim();data['_savedAt']=nowStr();data['_subjectId']=studyId;
+ downloadCSV(buildCSV([data]),`CRF_${studyId}_${new Date().toISOString().slice(0,10)}.csv`);
+ toast('📥 CSV 다운로드 완료 — Excel에서 열 수 있습니다');
+}
+function exportAllCSV(){
+ const idx=getIndex();if(!idx.length){toast('⚠️ 저장된 CRF 응답이 없습니다');return}
+ const records=idx.map(sid=>{try{return JSON.parse(localStorage.getItem('crf_fi_'+sid))}catch(e){return null}}).filter(Boolean);
+ downloadCSV(buildCSV(records),`CRF_전체${records.length}건_${new Date().toISOString().slice(0,10)}.csv`);
+ toast(`📥 CRF 전체 ${records.length}건 CSV 다운로드 완료`);
+}
+
+/* ============ 토스트 ============ */
+let toastTimer;
+function toast(msg){
+ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ============ 이벤트 위임 & 초기화 ============ */
+document.addEventListener('change',e=>{
+ dirty=true;
+ const n=e.target.name||'';
+ if(/^(inc|exc)\d/.test(n))calcElig();
+ else if(/^adl\d/.test(n))calcADL();
+ else if(/^fisi_/.test(n))calcFISI();
+ else if(/^wex\d/.test(n))calcWexner();
+ else if(/^fq\d/.test(n))calcFIQOL();
+ else if(/^mmse/.test(n))calcMMSE();
+ else if(/^gds\d/.test(n))calcGDS();
+ else if(/^kfes\d/.test(n))calcKFES();
+});
+/* ===== 외래 방문 설문 모듈 ===== */
+/* ============================================================
+   외래 방문 설문 모듈 (초진 init / 재진 fu)
+   - 같은 페이지, 모드 전환
+   - 등록번호 기준 CRF와 자동 연동
+   ============================================================ */
+
+/* ---- 공통 데이터 ---- */
+const SIDO_LIST=["서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주"];
+
+/* FISI 행 정의: [라벨, name, [값들(6단계)]] */
+const FISI_ROWS=[
+ ["가스","fisi_gas",[12,11,8,6,4,0]],
+ ["코같은 점액","fisi_mucus",[12,10,7,5,3,0]],
+ ["설사변","fisi_loose",[19,17,13,10,8,0]],
+ ["고형변","fisi_solid",[18,16,13,10,8,0]]
+];
+const FISI_COLS=["하루에 2회 이상","하루에 한 번","일주일에 2번 이상","일주일에 한 번","한 달에 1-3번","전혀 없다"];
+const WEX_ROWS=[["고형변 실금","wex1"],["액체변 실금","wex2"],["가스 실금","wex3"],["패드 착용","wex4"],["생활 방해","wex5"]];
+const WEX_COLS=["없음(0)","드물게(1)","가끔(2)","자주(3)","항상(4)"];
+
+/* ---- HTML 빌더 헬퍼 ---- */
+function radioRow(name,opts){ // opts: [[label,value],...]
+ return opts.map(o=>`<label><input type="radio" name="${name}" value="${o[1]}">${o[0]}</label>`).join('');
+}
+function fisiTableHTML(pfx){
+ const head=`<thead><tr><th style="text-align:left">대변 유형</th>${FISI_COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead>`;
+ const body=FISI_ROWS.map(r=>{
+  const cells=r[2].map(v=>`<td><input type="radio" name="${pfx}${r[1]}" value="${v}">${v}</td>`).join('');
+  return `<tr><td>${r[0]}</td>${cells}</tr>`;
+ }).join('');
+ return `<table class="tbl">${head}<tbody>${body}</tbody></table>`;
+}
+function wexTableHTML(pfx){
+ const head=`<thead><tr><th style="text-align:left">항목</th>${WEX_COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead>`;
+ const body=WEX_ROWS.map(r=>{
+  const cells=[0,1,2,3,4].map(v=>`<td><input type="radio" name="${pfx}${r[1]}" value="${v}"></td>`).join('');
+  return `<tr><td>${r[0]}</td>${cells}</tr>`;
+ }).join('');
+ return `<table class="tbl">${head}<tbody>${body}</tbody></table>`;
+}
+
+/* ---- 섹션 HTML 생성기 (mode = 'init' | 'fu') ---- */
+function buildDemoSection(mode){
+ const p=mode+'_';
+ return `<div class="sec-pg active" id="${mode}-demo">
+  <div class="sec-hd"><span class="sec-icon">🧍</span><div><div class="sec-title">인구통계학적 특성</div><div class="sec-desc">모든 항목은 필수 입력입니다. 미입력 시 다음 단계로 넘어갈 수 없습니다.</div></div></div>
+  <div class="req-banner" id="${mode}-demo-banner">⚠️ 빨간색으로 표시된 필수 항목을 입력해 주세요.</div>
+  <div class="card"><div class="card-bd">
+   <div class="frow">
+    <div class="fg half" data-req><label class="fl">1. 현재 거주지 — 시(도)<span class="req">*</span></label>
+     <input type="text" id="${p}sido" placeholder="예: 서울특별시">
+     <div class="invalid-msg">필수 항목입니다</div></div>
+    <div class="fg half" data-req><label class="fl">구(시, 군)<span class="req">*</span></label><input type="text" id="${p}gu" placeholder="예: 동작구"><div class="invalid-msg">필수 항목입니다</div></div>
+   </div>
+   <div class="frow">
+    <div class="fg half" data-req><label class="fl">2. 성별<span class="req">*</span></label><div class="rg">${radioRow(p+'sex',[["① 남","남"],["② 여","여"]])}</div><div class="invalid-msg">필수 항목입니다</div></div>
+    <div class="fg half" data-req><label class="fl">3. 만 나이<span class="req">*</span></label><div style="display:flex;align-items:center;gap:6px">만 <input type="number" id="${p}age" min="0" max="120" style="width:90px"> 세</div><div class="invalid-msg">필수 항목입니다</div></div>
+   </div>
+   <div class="frow">
+    <div class="fg half" data-req><label class="fl">4. 결혼 여부<span class="req">*</span></label><div class="rg">${radioRow(p+'marry',[["① 미혼","미혼"],["② 기혼","기혼"]])}</div><div class="invalid-msg">필수 항목입니다</div></div>
+    <div class="fg half" data-req><label class="fl">6. 본인 제외 동거 가족 수<span class="req">*</span></label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}family_cnt" min="0" style="width:90px"> 명</div><div class="invalid-msg">필수 항목입니다</div></div>
+   </div>
+   <div class="fg full" data-req><label class="fl">5. 함께 살고 있는 가족 (중복 선택 가능)<span class="req">*</span></label>
+    <div class="cg">
+     <label><input type="checkbox" name="${p}family" value="배우자·자녀">① 배우자·자녀</label>
+     <label><input type="checkbox" name="${p}family" value="배우자">② 배우자</label>
+     <label><input type="checkbox" name="${p}family" value="자녀">③ 자녀</label>
+     <label><input type="checkbox" name="${p}family" value="친인척">④ 친인척</label>
+     <label><input type="checkbox" name="${p}family" value="독거">⑤ 독거</label>
+     <label><input type="checkbox" name="${p}family" value="기타">⑥ 기타</label>
+     <input type="text" id="${p}family_etc" placeholder="기타 내용" style="width:140px">
+    </div><div class="invalid-msg">하나 이상 선택하세요</div></div>
+   <div class="fg full" data-req><label class="fl">7. 현재 배우자와 함께 거주 여부<span class="req">*</span></label>
+    <div class="rg" style="flex-direction:column;gap:6px;align-items:flex-start">
+     ${radioRow(p+'spouse',[["① 결혼/동거한 적 없음","결혼/동거한 적 없음"],["② 배우자 있음, 함께 거주","배우자 있음, 함께 거주"],["③ 배우자 있으나 별거 등","배우자 있음, 별거"],["④ 사별로 비동거","사별"],["⑤ 이혼 등으로 배우자 없음","이혼 등으로 배우자 없음"]])}
+    </div><div class="invalid-msg">필수 항목입니다</div></div>
+   <div class="fg full" data-req><label class="fl">8. 최종 학력 (중퇴 시 해당 학교 선택)<span class="req">*</span></label>
+    <div class="rg">
+     ${radioRow(p+'edu',[["① 무학","학교 다닌 적 없음"],["② 초등학교","초등학교"],["③ 중학교","중학교"],["④ 고등학교","고등학교"],["⑤ 전문대학","전문대학"],["⑥ 대학교(4년제+)","대학교(4년제 이상)"],["⑦ 대학원","대학원"]])}
+    </div><div class="invalid-msg">필수 항목입니다</div></div>
+  </div></div>
+  <div class="submit-bar">
+   <span class="submit-note">모든 필수 항목 입력 후 다음으로 진행됩니다</span>
+   <button class="btn btn-pri" onclick="vNext('${mode}','demo')">다음 →</button>
+  </div>
+ </div>`;
+}
+
+function buildHealthSection(mode){
+ const p=mode+'_';
+ return `<div class="sec-pg" id="${mode}-health">
+  <div class="sec-hd"><span class="sec-icon">🩺</span><div><div class="sec-title">건강관련 설문</div><div class="sec-desc">흡연·음주·수술력은 "없음/안 함" 선택 시 세부 입력을 건너뛸 수 있습니다. 폐경·산과력은 선택 입력입니다.</div></div></div>
+  <div class="req-banner" id="${mode}-health-banner">⚠️ 빨간색으로 표시된 필수 항목을 입력해 주세요.</div>
+
+  <div class="card"><div class="card-hd">심혈관계 위험요인</div><div class="card-bd">
+   <div class="fg full" data-req><label class="fl">1. 남자 45세 이상 / 여자 55세 이상 또는 폐경<span class="req">*</span></label><div class="rg">${radioRow(p+'cv1',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="fg full" data-req><label class="fl">2. 가족력 (직계 중 심장마비/심장수술 — 부·남형제 55세 이전, 모·여형제 65세 이전)<span class="req">*</span></label><div class="rg">${radioRow(p+'cv2',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">흡연</div><div class="card-bd">
+   <div class="fg full" data-req><label class="fl">3. 지금까지 피운 일반담배(궐련) 총량<span class="req">*</span></label>
+    <div class="rg" id="${p}smoke_amt_grp">${radioRow(p+'smoke_amt',[["5갑(100개비) 미만","5갑 미만"],["5갑(100개비) 이상","5갑 이상"],["피운 적 없음","없음"]])}</div>
+    <div class="invalid-msg">필수</div></div>
+   <div class="cond" id="${p}smoke_detail">
+    <div class="frow">
+     <div class="fg half"><label class="fl">4. 처음 한 개비를 다 피운 시기</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}smoke_age" min="0" style="width:90px"> 세</div></div>
+     <div class="fg half"><label class="fl">5. 현재 흡연 여부</label><div class="rg">${radioRow(p+'smoke_now',[["매일 피움","매일"],["가끔 피움","가끔"],["과거 흡연, 현재 안 함","과거"]])}</div></div>
+    </div>
+   </div>
+   <hr class="dvd">
+   <div class="fg full" data-req><label class="fl">6. 좌식생활 (최근 3개월 중강도 운동 주5회 미만)<span class="req">*</span></label><div class="rg">${radioRow(p+'sedentary',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="fg full" data-req><label class="fl">7. 비만 — 허리둘레 (남 35인치+ / 여 31인치+)<span class="req">*</span></label><div class="rg">${radioRow(p+'obesity',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">낙상 경험</div><div class="card-bd">
+   <div class="fg full" data-req><label class="fl">지난 1년간 낙상 경험<span class="req">*</span></label><div class="rg" id="${p}fall_grp">${radioRow(p+'fall',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="cond" id="${p}fall_detail">
+    <div class="frow">
+     <div class="fg half"><label class="fl">낙상 횟수</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}fall_cnt" min="0" style="width:90px"> 회</div></div>
+     <div class="fg half"><label class="fl">낙상으로 인한 골절 경험</label><div class="rg">${radioRow(p+'fall_fx',[["예","예"],["아니오","아니오"]])}</div></div>
+    </div>
+   </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">음주</div><div class="card-bd">
+   <div class="fg full" data-req><label class="fl">지금까지 1잔 이상 음주 경험 (제사·차례 제외)<span class="req">*</span></label><div class="rg" id="${p}drink_grp">${radioRow(p+'drink',[["있음","있음"],["없음","없음"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="cond" id="${p}drink_detail">
+    <div class="frow">
+     <div class="fg third"><label class="fl">한 달에 음주 횟수</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}drink_monthly" min="0" style="width:80px"> 번</div></div>
+     <div class="fg third"><label class="fl">일주일에 음주 횟수</label><div class="rg">${radioRow(p+'drink_weekly',[["1","1번"],["2","2번"],["3","3번"],["4","4번"],["5","5번"],["6","6번"],["7+","7번 이상"]])}</div></div>
+    </div>
+    <div class="fg full"><label class="fl">한 번에 마시는 양 (잔 기준 / 캔맥주 355cc=맥주 1.6잔)</label><div class="rg">${radioRow(p+'drink_amount',[["1-2잔","1-2잔"],["3-4잔","3-4잔"],["5-6잔","5-6잔"],["7-9잔","7-9잔"],["10잔 이상","10잔 이상"]])}</div></div>
+   </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">항문/직장 수술력</div><div class="card-bd">
+   <div class="fg full" data-req><label class="fl">항문/직장 수술을 받은 적이 있습니까?<span class="req">*</span></label><div class="rg" id="${p}surg_grp">${radioRow(p+'surg',[["있음","있음"],["없음","없음"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="cond" id="${p}surg_detail">
+    <table class="tbl"><thead><tr><th style="text-align:left">수술 종류</th><th>받은 연도(YYYY)</th></tr></thead><tbody>
+     <tr><td>치질 수술</td><td><input type="text" id="${p}surg_hemorr" placeholder="예: 2018"></td></tr>
+     <tr><td>항문 누공 수술</td><td><input type="text" id="${p}surg_fistula"></td></tr>
+     <tr><td>항문 열상 수술</td><td><input type="text" id="${p}surg_fissure"></td></tr>
+     <tr><td>직장 수술 <input type="text" id="${p}surg_rectal_type" placeholder="종류" style="width:110px"></td><td><input type="text" id="${p}surg_rectal_yr"></td></tr>
+     <tr><td>기타 <input type="text" id="${p}surg_etc_type" placeholder="종류" style="width:110px"></td><td><input type="text" id="${p}surg_etc_yr"></td></tr>
+    </tbody></table>
+   </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">과거력 / 현병력</div><div class="card-bd">
+   <div class="fg full" data-req><label class="fl">의사에게 진단받은 질환이 있습니까?<span class="req">*</span></label><div class="rg" id="${p}diag_grp">${radioRow(p+'diag_has',[["있음","있음"],["없음","없음"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="cond" id="${p}diag_detail">
+    <table class="tbl"><thead><tr><th style="text-align:left">질환</th><th>진단받은 적?</th><th>현재 치료 중?</th><th>진단시기(YYYY)</th></tr></thead>
+    <tbody id="${p}diagTb"></tbody></table>
+   </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">복용 약물</div><div class="card-bd">
+   <div class="frow">
+    <div class="fg half"><label class="fl">현재 규칙적으로 복용 중인 약</label><input type="text" id="${p}med_current" placeholder="명칭 (없으면 비워두세요)"></div>
+    <div class="fg half"><label class="fl">오늘 아침 복용한 약</label><input type="text" id="${p}med_today" placeholder="명칭"></div>
+   </div>
+   <div class="fg full"><label class="fl">변비/설사 관련 약물</label>
+    <div class="cg">
+     <label><input type="checkbox" name="${p}bowelmed" value="완하제">완하제</label>
+     <label><input type="checkbox" name="${p}bowelmed" value="지사제">지사제</label>
+     <label><input type="checkbox" name="${p}bowelmed" value="항문약물">항문 관련 약물</label>
+    </div>
+    <input type="text" id="${p}bowelmed_detail" placeholder="종류 / 빈도" style="margin-top:6px">
+   </div>
+  </div></div>
+
+  <div class="card"><div class="card-hd">폐경 / 산과력 <span class="cond-hint">(여성만 해당 · 선택 입력)</span></div><div class="card-bd">
+   <div class="frow">
+    <div class="fg half"><label class="fl">마지막 생리 1년 이상 경과 (폐경)</label><div class="rg">${radioRow(p+'menopause',[["예","예"],["아니오","아니오"]])}</div></div>
+    <div class="fg half"><label class="fl">폐경 연령</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}menopause_age" min="0" style="width:90px"> 세</div></div>
+   </div>
+   <div class="frow">
+    <div class="fg third"><label class="fl">총 임신 횟수</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}preg_total" min="0" style="width:80px"> 회</div></div>
+    <div class="fg third"><label class="fl">자연분만</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}delivery_svd" min="0" style="width:80px"> 회</div></div>
+    <div class="fg third"><label class="fl">제왕절개</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}delivery_cs" min="0" style="width:80px"> 회</div></div>
+   </div>
+   <div class="frow">
+    <div class="fg half"><label class="fl">회음부 열상(3-4도) 경험</label><div class="rg">${radioRow(p+'perineal',[["예","예"],["아니오","아니오"]])}</div></div>
+    <div class="fg half"><label class="fl">질식 분만 시 기구 사용</label><div class="rg">${radioRow(p+'instrumental',[["예","예"],["아니오","아니오"]])}</div></div>
+   </div>
+  </div></div>
+
+  <div class="submit-bar">
+   <button class="btn btn-out" onclick="vPrev('${mode}','health')">← 이전</button>
+   <button class="btn btn-pri" onclick="vNext('${mode}','health')">다음 →</button>
+  </div>
+ </div>`;
+}
+
+function buildFisiSection(mode){
+ const p=mode+'_';
+ return `<div class="sec-pg${mode==='fu'?' active':''}" id="${mode}-fisi">
+  <div class="sec-hd"><span class="sec-icon">📊</span><div><div class="sec-title">대변실금 심각도 지수 (FISI)</div><div class="sec-desc">지난 한 달간 실금 빈도 — 4개 항목 모두 필수 입력. 총점은 자동 계산됩니다.</div></div></div>
+  <div class="req-banner" id="${mode}-fisi-banner">⚠️ 4개 항목을 모두 선택해 주세요.</div>
+  <div class="card"><div class="card-bd" style="overflow-x:auto" data-req>
+   ${fisiTableHTML(p)}
+   <div class="invalid-msg">모든 항목을 선택하세요</div>
+   <div class="sc-box"><div class="sc-item"><span class="sc-label">FISI 총점 (0-61)</span><span class="sc-val" id="${p}fisiScore">-</span></div><div id="${p}fisiInterp"></div></div>
+  </div></div>
+  <div class="submit-bar">
+   ${mode==='init'?`<button class="btn btn-out" onclick="vPrev('${mode}','fisi')">← 이전</button>`:''}
+   <button class="btn btn-pri" onclick="vNext('${mode}','fisi')">다음 →</button>
+  </div>
+ </div>`;
+}
+
+function buildWexnerSection(mode){
+ const p=mode+'_';
+ return `<div class="sec-pg" id="${mode}-wexner">
+  <div class="sec-hd"><span class="sec-icon">📊</span><div><div class="sec-title">Wexner Score</div><div class="sec-desc">5개 항목 모두 필수 입력. 총점은 자동 계산됩니다.</div></div></div>
+  <div class="req-banner" id="${mode}-wexner-banner">⚠️ 5개 항목을 모두 선택해 주세요.</div>
+  <div class="card"><div class="card-bd" style="overflow-x:auto" data-req>
+   ${wexTableHTML(p)}
+   <div class="invalid-msg">모든 항목을 선택하세요</div>
+   <div class="sc-box"><div class="sc-item"><span class="sc-label">Wexner 총점 (0-20)</span><span class="sc-val" id="${p}wexnerScore">-</span></div><div id="${p}wexnerInterp"></div></div>
+  </div></div>
+  <div class="submit-bar">
+   <button class="btn btn-out" onclick="vPrev('${mode}','wexner')">← 이전</button>
+   <button class="btn btn-pri" onclick="vNext('${mode}','wexner')">다음 →</button>
+  </div>
+ </div>`;
+}
+
+function buildHabitSection(mode){
+ const p=mode+'_';
+ return `<div class="sec-pg" id="${mode}-habit">
+  <div class="sec-hd"><span class="sec-icon">🗒️</span><div><div class="sec-title">배변습관 &amp; 대변실금 추가 정보</div><div class="sec-desc">배변 빈도·대변 굳기 등은 필수, 추가 정보는 해당 항목을 선택해 주세요.</div></div></div>
+  <div class="req-banner" id="${mode}-habit-banner">⚠️ 빨간색으로 표시된 필수 항목을 입력해 주세요.</div>
+  <div class="card"><div class="card-hd">배변습관</div><div class="card-bd">
+   <div class="fg full" data-req><label class="fl">평소 배변 빈도<span class="req">*</span></label><div class="rg">${radioRow(p+'bowel_freq',[["하루 3회 이상","하루 3회 이상"],["하루 1-2회","하루 1-2회"],["2일에 1회","2일에 1회"],["3일에 1회","3일에 1회"],["주 1-2회","주 1-2회"],["주 1회 미만","주 1회 미만"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="fg full" data-req><label class="fl">평소 대변 굳기 (Bristol Stool Form Scale)<span class="req">*</span></label><div class="rg">${radioRow(p+'bristol',[["1형 (단단한 덩어리)","1형(단단한 덩어리)"],["2형 (딱딱한 소시지)","2형(소시지, 딱딱함)"],["3형 (갈라진 소시지)","3형(소시지, 갈라짐)"],["4형 (부드러운 소시지)","4형(부드러운 소시지)"],["5형 (부드러운 덩어리)","5형(부드러운 덩어리)"],["6형 (걸쭉한 액체)","6형(걸쭉한 액체)"],["7형 (액체)","7형(액체)"]])}</div><div class="invalid-msg">필수</div></div>
+   <div class="frow">
+    <div class="fg third" data-req><label class="fl">변비 증상<span class="req">*</span></label><div class="rg">${radioRow(p+'sym_constip',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+    <div class="fg third" data-req><label class="fl">설사 증상<span class="req">*</span></label><div class="rg">${radioRow(p+'sym_diarr',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+    <div class="fg third" data-req><label class="fl">배변 시 과도한 힘주기<span class="req">*</span></label><div class="rg">${radioRow(p+'sym_strain',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+   </div>
+   <div class="frow">
+    <div class="fg third" data-req><label class="fl">대변 보류 습관<span class="req">*</span></label><div class="rg">${radioRow(p+'sym_retention',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+    <div class="fg third" data-req><label class="fl">불완전 배변감<span class="req">*</span></label><div class="rg">${radioRow(p+'sym_incomplete',[["예","예"],["아니오","아니오"]])}</div><div class="invalid-msg">필수</div></div>
+   </div>
+  </div></div>
+  <div class="card"><div class="card-hd">대변실금 관련 추가 정보</div><div class="card-bd">
+   <div class="frow">
+    <div class="fg half"><label class="fl">최초 증상 발생 시기</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}fi_onset" min="0" style="width:90px"> 년 전</div></div>
+    <div class="fg half"><label class="fl">주로 발생하는 상황</label><input type="text" id="${p}fi_situation" placeholder="예: 기침할 때"></div>
+   </div>
+   <div class="fg full"><label class="fl">악화 요인 (중복 선택 가능)</label>
+    <div class="cg">
+     <label><input type="checkbox" name="${p}fi_aggr" value="설사">설사</label>
+     <label><input type="checkbox" name="${p}fi_aggr" value="기침/재채기">기침/재채기</label>
+     <label><input type="checkbox" name="${p}fi_aggr" value="긴장">긴장</label>
+     <label><input type="checkbox" name="${p}fi_aggr" value="특정 음식">특정 음식</label>
+     <label><input type="checkbox" name="${p}fi_aggr" value="기타">기타</label>
+     <input type="text" id="${p}fi_aggr_etc" placeholder="기타" style="width:120px">
+    </div></div>
+   <div class="frow">
+    <div class="fg half"><label class="fl">패드 사용 여부</label><div class="rg" id="${p}pad_grp">${radioRow(p+'pad',[["예","예"],["아니오","아니오"]])}</div>
+     <div class="cond" id="${p}pad_detail" style="display:flex;align-items:center;gap:6px;margin-top:6px">하루 <input type="number" id="${p}pad_cnt" min="0" style="width:70px"> 장</div></div>
+    <div class="fg half"><label class="fl">대변실금으로 인한 사회활동 제한</label><div class="rg">${radioRow(p+'social_limit',[["예","예"],["아니오","아니오"]])}</div></div>
+   </div>
+   <div class="fg full"><label class="fl">이전 치료 경험 (중복 선택 가능)</label>
+    <div class="cg" id="${p}tx_grp">
+     <label><input type="checkbox" name="${p}fi_tx" value="없음" onchange="onTxNone('${mode}')">없음</label>
+     <label><input type="checkbox" name="${p}fi_tx" value="약물">약물</label>
+     <label><input type="checkbox" name="${p}fi_tx" value="바이오피드백">바이오피드백</label>
+     <label><input type="checkbox" name="${p}fi_tx" value="골반저 운동">골반저 운동</label>
+     <label><input type="checkbox" name="${p}fi_tx" value="수술">수술</label>
+     <label><input type="checkbox" name="${p}fi_tx" value="기타">기타</label>
+     <input type="text" id="${p}fi_tx_etc" placeholder="기타" style="width:120px">
+    </div></div>
+  </div></div>
+  <div class="submit-bar">
+   <button class="btn btn-out" onclick="vPrev('${mode}','habit')">← 이전</button>
+   <button class="btn btn-pri" onclick="vNext('${mode}','habit')">다음 →</button>
+  </div>
+ </div>`;
+}
+
+function buildFiqolSection(mode){
+ const p=mode+'_';
+ return `<div class="sec-pg" id="${mode}-fiqol">
+  <div class="sec-hd"><span class="sec-icon">💬</span><div><div class="sec-title">대변실금 관련 삶의 질 (FIQOL)</div><div class="sec-desc">건강 인식 2문항 + 변실금 영향 27문항 — 모두 필수 입력. 점수는 자동 계산됩니다.</div></div></div>
+  <div class="req-banner" id="${mode}-fiqol-banner">⚠️ 모든 문항(29개)을 선택해 주세요.</div>
+  <div class="card"><div class="card-bd" data-req>
+   <div class="fg full"><label class="fl">1. 본인의 건강에 대해 어떻게 생각하십니까?<span class="req">*</span></label><div class="rg">${radioRow(p+'fq_h1',[["① 최고도로 건강","5"],["② 매우 좋다","4"],["③ 좋은 편","3"],["④ 괜찮은 편","2"],["⑤ 나쁘다","1"]])}</div></div>
+   <hr class="dvd">
+   <div class="fg full"><label class="fl">2. 지난달 슬프거나, 기운 없거나, 우울하거나, 무기력했던 일이 있었습니까?<span class="req">*</span></label><div class="rg" style="flex-direction:column;align-items:flex-start;gap:6px">${radioRow(p+'fq_h2',[["① 너무 그래서 다 포기하고 싶었다","1"],["② 그런 적이 매우 많았다","2"],["③ 그런 적이 많은 편","3"],["④ 약간 그런 편","4"],["⑤ 전혀 그런 적 없다","5"]])}</div></div>
+   <div class="invalid-msg">건강 인식 2문항을 모두 선택하세요</div>
+  </div></div>
+  <div class="card"><div class="card-hd">변이 새는 것 때문에 다음과 같은 것이 문제가 됩니다</div><div class="card-bd" style="overflow-x:auto" data-req>
+   <table class="tbl"><thead><tr><th style="text-align:left">문항</th><th>전적으로 그렇다(1)</th><th>다소 그렇다(2)</th><th>보통이다(3)</th><th>그렇지 않다(4)</th></tr></thead>
+   <tbody id="${p}fiqolTb"></tbody></table>
+   <div class="invalid-msg">27개 문항을 모두 선택하세요</div>
+   <div class="sc-box"><div class="sc-item"><span class="sc-label">FIQOL 총점</span><span class="sc-val" id="${p}fiqolScore">-</span></div><div class="sc-item"><span class="sc-label">평균</span><span class="sc-val" id="${p}fiqolAvg" style="font-size:18px">-</span></div></div>
+  </div></div>
+  <div class="submit-bar">
+   <button class="btn btn-out" onclick="vPrev('${mode}','fiqol')">← 이전</button>
+   <button class="btn btn-pri" onclick="vNext('${mode}','fiqol')">다음 →</button>
+  </div>
+ </div>`;
+}
+
+function buildHrSection(mode){
+ const p=mode+'_';
+ const meals=[["b","아침 식사","예: 7:30"],["l","점심 식사","예: 12:30"],["d","저녁 식사","예: 18:30"],["s","간식","예: 15:00, 21:00"]];
+ const mealRows=meals.map(m=>`<tr id="${p}hr_${m[0]}_row">
+   <td>${m[1]}<br><span style="font-size:10px;color:#718096">${m[2]}</span><br>
+    <label style="font-size:11px;display:inline-flex;align-items:center;gap:3px;margin-top:4px"><input type="checkbox" id="${p}hr_${m[0]}_skip" onchange="onMealSkip('${mode}','${m[0]}')"> 먹지 않음</label></td>
+   <td><input type="text" id="${p}hr_${m[0]}_time"></td>
+   <td><input type="text" id="${p}hr_${m[0]}_place"></td>
+   <td><input type="text" id="${p}hr_${m[0]}_food"></td>
+   <td><input type="text" id="${p}hr_${m[0]}_amt"></td>
+   <td><input type="text" id="${p}hr_${m[0]}_note"></td></tr>`).join('');
+ return `<div class="sec-pg" id="${mode}-hr">
+  <div class="sec-hd"><span class="sec-icon">🥗</span><div><div class="sec-title">24시간 회상법 (24HR)</div><div class="sec-desc">"먹지 않음" 체크 시 해당 식사 입력란이 비활성화됩니다. 특이사항은 선택 입력입니다.</div></div></div>
+  <div class="card"><div class="card-hd">기본 정보</div><div class="card-bd">
+   <div class="frow">
+    <div class="fg third"><label class="fl">날짜</label><input type="date" id="${p}hr_date"></div>
+    <div class="fg" style="flex:2"><label class="fl">오늘이 평소와 비교하여</label>
+     <div class="rg">${radioRow(p+'hr_cmp',[["평소와 비슷","평소와 비슷한 식사"],["많이 먹음","평소보다 많이 먹음"],["적게 먹음","평소보다 적게 먹음"],["특별한 날","특별한 날의 식사"]])}</div></div>
+   </div>
+  </div></div>
+  <div class="card"><div class="card-hd">가) 상세 식품 섭취 기록</div><div class="card-bd" style="overflow-x:auto">
+   <table class="tbl" style="min-width:820px"><thead><tr><th width="16%">식사 구분</th><th width="12%">시간</th><th width="14%">장소</th><th>음식명</th><th width="13%">분량(인분)</th><th width="16%">특이사항</th></tr></thead>
+   <tbody>${mealRows}</tbody></table>
+  </div></div>
+  <div class="card"><div class="card-hd">나) 식사 관련 특이사항 <span class="cond-hint">(선택 입력)</span></div><div class="card-bd">
+   <div class="frow">
+    <div class="fg third"><label class="fl">수분 섭취량 (물, 차 등)</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="${p}hr_water" min="0" style="width:120px"><span class="unit">ml</span></div></div>
+    <div class="fg"><label class="fl">배변 상태</label><div class="rg">${radioRow(p+'hr_bowel',[["정상","정상"],["설사","설사"],["변비","변비"],["기타","기타"]])}<input type="text" id="${p}hr_bowel_etc" placeholder="기타" style="width:110px"></div></div>
+   </div>
+   <div class="fg full"><label class="fl">식이 보충제 섭취 여부</label>
+    <div class="rg" id="${p}hr_supp_grp">${radioRow(p+'hr_supp',[["없음","없음"],["있음","있음"]])}
+     <input type="text" id="${p}hr_supp_type" placeholder="종류" style="width:130px"><input type="text" id="${p}hr_supp_amt" placeholder="섭취량" style="width:110px"></div></div>
+  </div></div>
+  <div class="submit-bar">
+   <span class="submit-note">마지막 단계입니다 — 제출 시 응답이 저장됩니다</span>
+   <button class="btn btn-out" onclick="vPrev('${mode}','hr')">← 이전</button>
+   <button class="btn btn-suc" onclick="vSubmit('${mode}')">✅ 제출</button>
+  </div>
+ </div>`;
+}
+
+/* ---- 뷰 조립 ---- */
+const INIT_SECTIONS=['demo','health','fisi','wexner','habit','fiqol','hr'];
+const FU_SECTIONS=['fisi','wexner','habit','fiqol','hr'];
+function sectionHTML(mode,sec){
+ switch(sec){
+  case 'demo':return buildDemoSection(mode);
+  case 'health':return buildHealthSection(mode);
+  case 'fisi':return buildFisiSection(mode);
+  case 'wexner':return buildWexnerSection(mode);
+  case 'habit':return buildHabitSection(mode);
+  case 'fiqol':return buildFiqolSection(mode);
+  case 'hr':return buildHrSection(mode);
+ }
+ return '';
+}
+function buildVisitView(mode){
+ const secs=mode==='init'?INIT_SECTIONS:FU_SECTIONS;
+ document.getElementById('view-'+mode).innerHTML=secs.map(s=>sectionHTML(mode,s)).join('');
+ // FIQOL 27문항 채우기
+ const p=mode+'_';
+ document.getElementById(p+'fiqolTb').innerHTML=FIQOL_ITEMS.map((t,i)=>`<tr><td style="text-align:left">${i+1}. ${t}</td>${[1,2,3,4].map(v=>`<td><input type="radio" name="${p}fq${i+1}" value="${v}"></td>`).join('')}</tr>`).join('');
+ // 진단 질환 테이블 (초진/재진 동일 구조이나 초진만 health 섹션 보유)
+ if(mode==='init'){
+  const DIAG=[["심혈관계","고혈압"],["심혈관계","이상지질혈증(고지혈증)"],["심혈관계","뇌혈관질환"],["심혈관계","관상동맥질환"],["심혈관계","심근경색"],["심혈관계","협심증"],["내분비계","갑상선 질환"],["내분비계","당뇨병"],["근골격계","골관절염"],["근골격계","류머티스 관절염"],["근골격계","골다공증"],["근골격계","허리 통증/좌골신경통"],["근골격계","목 디스크"],["암","암(종류 기재)"],["기타","기타 질환 1"],["기타","기타 질환 2"]];
+  let prev='';
+  document.getElementById(p+'diagTb').innerHTML=DIAG.map((it,i)=>{
+   const n=i+1;let hdr='';
+   if(it[0]!==prev){hdr=`<tr><td colspan="4" style="background:#eef2ff;font-weight:700;text-align:left">${it[0]}</td></tr>`;prev=it[0];}
+   const nameCell=(it[0]==='암'||it[0]==='기타')?`${it[1]}<br><input type="text" id="${p}diag${n}_name" placeholder="${it[0]==='암'?'암 종류':'질환명'}" style="width:130px;margin-top:3px">`:it[1];
+   return hdr+`<tr><td style="text-align:left">${nameCell}</td><td><div class="yn"><label><input type="radio" name="${p}diag${n}_dx" value="예">예</label><label><input type="radio" name="${p}diag${n}_dx" value="아니오">아니오</label></div></td><td><div class="yn"><label><input type="radio" name="${p}diag${n}_tx" value="예">예</label><label><input type="radio" name="${p}diag${n}_tx" value="아니오">아니오</label></div></td><td><input type="text" id="${p}diag${n}_when" placeholder="예: 2015" style="width:90px"></td></tr>`;
+  }).join('');
+ }
+}
+
+/* ---- 조건부 활성화 핸들러 ---- */
+function setBlockEnabled(id,on){const el=document.getElementById(id);if(!el)return;el.classList.toggle('disabled-block',!on);if(!on){el.querySelectorAll('input,select,textarea').forEach(f=>{if(f.type==='radio'||f.type==='checkbox')f.checked=false;else f.value='';});}}
+function onMealSkip(mode,m){
+ const p=mode+'_';const skip=document.getElementById(p+'hr_'+m+'_skip').checked;
+ ['time','place','food','amt','note'].forEach(k=>{const el=document.getElementById(p+'hr_'+m+'_'+k);if(el){el.disabled=skip;if(skip)el.value='';}});
+}
+function onTxNone(mode){
+ const p=mode+'_';
+ const none=document.querySelector(`input[name="${p}fi_tx"][value="없음"]`).checked;
+ document.querySelectorAll(`input[name="${p}fi_tx"]`).forEach(cb=>{if(cb.value!=='없음'){cb.disabled=none;if(none)cb.checked=false;}});
+ const etc=document.getElementById(p+'fi_tx_etc');if(etc){etc.disabled=none;if(none)etc.value='';}
+}
+
+/* 흡연/음주/수술/낙상/진단/패드 조건부 토글 */
+function wireConditionals(mode){
+ const p=mode+'_';
+ const bind=(name,handler)=>document.querySelectorAll(`input[name="${p}${name}"]`).forEach(r=>r.addEventListener('change',handler));
+ bind('smoke_amt',()=>{const v=rv(p+'smoke_amt');setBlockEnabled(p+'smoke_detail',v&&v!=='없음');});
+ bind('fall',()=>{setBlockEnabled(p+'fall_detail',rv(p+'fall')==='예');});
+ bind('drink',()=>{setBlockEnabled(p+'drink_detail',rv(p+'drink')==='있음');});
+ bind('surg',()=>{setBlockEnabled(p+'surg_detail',rv(p+'surg')==='있음');});
+ bind('diag_has',()=>{setBlockEnabled(p+'diag_detail',rv(p+'diag_has')==='있음');});
+ bind('pad',()=>{setBlockEnabled(p+'pad_detail',rv(p+'pad')==='예');});
+ // 초기 비활성화 상태
+ ['smoke_detail','fall_detail','drink_detail','surg_detail','diag_detail','pad_detail'].forEach(id=>setBlockEnabled(p+id,false));
+}
+
+/* ---- 점수 계산 (초진/재진 공용) ---- */
+function vCalcFISI(mode){
+ const p=mode+'_';
+ const ks=['fisi_gas','fisi_mucus','fisi_loose','fisi_solid'].map(n=>rv(p+n));
+ const sc=document.getElementById(p+'fisiScore');if(!sc)return;
+ if(ks.some(v=>v===null)){sc.textContent='-';setInterp(p+'fisiInterp','','');return}
+ const s=ks.reduce((a,b)=>a+ +b,0);sc.textContent=s;
+ if(s===0)setInterp(p+'fisiInterp','정상(실금 없음)','si-n');else if(s<=20)setInterp(p+'fisiInterp','경도(mild)','si-mi');else if(s<=40)setInterp(p+'fisiInterp','중등도(moderate)','si-mo');else setInterp(p+'fisiInterp','중증(severe)','si-sv');
+}
+function vCalcWexner(mode){
+ const p=mode+'_';
+ const ks=[1,2,3,4,5].map(i=>rv(p+'wex'+i));
+ const sc=document.getElementById(p+'wexnerScore');if(!sc)return;
+ if(ks.some(v=>v===null)){sc.textContent='-';setInterp(p+'wexnerInterp','','');return}
+ const s=ks.reduce((a,b)=>a+ +b,0);sc.textContent=s;
+ setInterp(p+'wexnerInterp',s===0?'정상':s<=9?'경도~중등도':'중증 경향',s===0?'si-n':s<=9?'si-mi':'si-sv');
+}
+function vCalcFIQOL(mode){
+ const p=mode+'_';
+ const vals=[];for(let i=1;i<=27;i++){const v=rv(p+'fq'+i);if(v===null){document.getElementById(p+'fiqolScore').textContent='-';document.getElementById(p+'fiqolAvg').textContent='-';return}vals.push(+v);}
+ const h1=rv(p+'fq_h1'),h2=rv(p+'fq_h2');
+ const sum=vals.reduce((a,b)=>a+b,0);
+ document.getElementById(p+'fiqolScore').textContent=sum+(h1&&h2?' (+건강'+( +h1+ +h2)+')':'');
+ document.getElementById(p+'fiqolAvg').textContent=(sum/27).toFixed(2);
+}
+
+/* ---- 검증 ---- */
+function validateSection(mode,sec){
+ const view=document.getElementById('view-'+mode);
+ const pg=document.getElementById(mode+'-'+sec);
+ let ok=true;
+ pg.querySelectorAll('[data-req]').forEach(grp=>{
+  // 비활성화 블록 내부는 검증 제외
+  if(grp.closest('.disabled-block')){grp.classList.remove('invalid');return;}
+  let filled=false;
+  const radios=grp.querySelectorAll('input[type="radio"]');
+  const checks=grp.querySelectorAll('input[type="checkbox"]');
+  const fields=grp.querySelectorAll('input[type="text"],input[type="number"],select');
+  if(radios.length){
+   // 그룹 내 라디오는 name별로 모두 선택돼야 함
+   const names=[...new Set([...radios].map(r=>r.name))];
+   filled=names.every(nm=>grp.querySelector(`input[name="${nm}"]:checked`));
+  } else if(checks.length){
+   filled=[...checks].some(c=>c.checked);
+  } else if(fields.length){
+   filled=[...fields].every(f=>f.value.trim()!=='');
+  }
+  grp.classList.toggle('invalid',!filled);
+  if(!filled)ok=false;
+ });
+ const banner=document.getElementById(mode+'-'+sec+'-banner');
+ if(banner)banner.classList.toggle('show',!ok);
+ if(!ok){const fi=pg.querySelector('.invalid');if(fi&&fi.scrollIntoView)fi.scrollIntoView({behavior:'smooth',block:'center'});}
+ return ok;
+}
+
+/* ---- 네비게이션 (뷰 내부 섹션 이동) ---- */
+function goV(mode,sec){
+ const view=document.getElementById('view-'+mode);
+ view.querySelectorAll('.sec-pg').forEach(p=>p.classList.remove('active'));
+ document.getElementById(mode+'-'+sec).classList.add('active');
+ document.querySelectorAll('#nav-'+mode+'-group .nav-item').forEach(n=>n.classList.remove('active'));
+ const nv=document.getElementById('nav-'+mode+'-'+sec);if(nv)nv.classList.add('active');
+ document.getElementById('main').scrollTop=0;
+}
+function vSecList(mode){return mode==='init'?INIT_SECTIONS:FU_SECTIONS;}
+function vNext(mode,sec){
+ if(!validateSection(mode,sec)){toast('⚠️ 필수 항목을 입력해야 다음으로 넘어갈 수 있습니다');return;}
+ const list=vSecList(mode),i=list.indexOf(sec);
+ if(i<list.length-1)goV(mode,list[i+1]);
+}
+function vPrev(mode,sec){
+ const list=vSecList(mode),i=list.indexOf(sec);
+ if(i>0)goV(mode,list[i-1]);
+}
+function vSubmit(mode){
+ const list=vSecList(mode);
+ for(const sec of list){
+  if(!validateSection(mode,sec)){goV(mode,sec);toast('⚠️ ['+sectionLabel(sec)+'] 필수 항목이 비어 있습니다');return;}
+ }
+ const regId=document.getElementById('subjectId').value.trim();
+ if(!regId){toast('⚠️ 등록번호를 입력하세요');document.getElementById('subjectId').focus();return;}
+ saveVisit(mode,true);
+ toast('✅ '+(mode==='init'?'초진':'재진')+' 설문 제출 완료 ('+regId+')');
+}
+function sectionLabel(sec){return {demo:'인구통계',health:'건강설문',fisi:'FISI',wexner:'Wexner',habit:'배변습관',fiqol:'FIQOL',hr:'24시간 회상법'}[sec]||sec;}
+
+/* ---- 저장/불러오기 (방문 설문) — 다중 기록 지원 (재진은 같은 환자 여러 건) ----
+   저장 모델: visit_{mode}_{recId} = {data..., _recId,_regId,_visitName,_visitType,_visitDate,_createdAt,_savedAt}
+   인덱스: visit_{mode}_index = [recId,...] */
+function visitKey(mode,recId){return 'visit_'+mode+'_'+recId;}
+function visitIdxKey(mode){return 'visit_'+mode+'_index';}
+function getVisitIdx(mode){try{return JSON.parse(localStorage.getItem(visitIdxKey(mode)))||[]}catch(e){return[]}}
+function setVisitIdx(mode,x){localStorage.setItem(visitIdxKey(mode),JSON.stringify(x))}
+function getVisitRec(mode,recId){try{return JSON.parse(localStorage.getItem(visitKey(mode,recId)))}catch(e){return null}}
+// 등록번호로 해당 모드의 모든 기록 찾기 (최신순)
+function findVisitsByReg(mode,regId){
+ return getVisitIdx(mode).map(id=>getVisitRec(mode,id)).filter(r=>r&&r._regId===regId)
+  .sort((a,b)=>(b._visitDate||b._createdAt||'').localeCompare(a._visitDate||a._createdAt||''));
+}
+let currentVisitRecId={init:null,fu:null}; // 현재 편집 중인 기록 id
+
+function collectVisit(mode){
+ const data={};
+ document.querySelectorAll('#view-'+mode+' input, #view-'+mode+' select, #view-'+mode+' textarea').forEach(el=>{
+  if(el.type==='radio'){if(el.checked)data['r:'+el.name]=el.value;else if(!(('r:'+el.name)in data))data['r:'+el.name]='';}
+  else if(el.type==='checkbox'){const key='c:'+(el.id||el.name+':'+el.value);data[key]=el.checked?(el.value||'1'):'';}
+  else if(el.id){data['i:'+el.id]=el.value;}
+ });
+ return data;
+}
+function applyVisit(mode,data){
+ // 폼 초기화 후 적용
+ document.querySelectorAll('#view-'+mode+' input, #view-'+mode+' select, #view-'+mode+' textarea').forEach(el=>{
+  if(el.type==='radio'||el.type==='checkbox')el.checked=false;else el.value='';el.disabled=false;
+ });
+ Object.entries(data).forEach(([k,v])=>{
+  if(k.startsWith('i:')){const el=document.getElementById(k.slice(2));if(el)el.value=v;}
+  else if(k.startsWith('r:')){if(v==='')return;const el=document.querySelector(`#view-${mode} input[name="${CSS.escape(k.slice(2))}"][value="${CSS.escape(v)}"]`);if(el)el.checked=true;}
+  else if(k.startsWith('c:')){const id=k.slice(2);const el=document.getElementById(id)||document.querySelector(`#view-${mode} input[name="${CSS.escape(id.split(':')[0])}"][value="${CSS.escape(id.split(':').slice(1).join(':'))}"]`);if(el)el.checked=!!v;}
+ });
+ const p=mode+'_';
+ if(mode==='init'){
+  wireConditionals(mode);
+  setBlockEnabled(p+'smoke_detail',rv(p+'smoke_amt')&&rv(p+'smoke_amt')!=='없음');
+  setBlockEnabled(p+'fall_detail',rv(p+'fall')==='예');
+  setBlockEnabled(p+'drink_detail',rv(p+'drink')==='있음');
+  setBlockEnabled(p+'surg_detail',rv(p+'surg')==='있음');
+  setBlockEnabled(p+'diag_detail',rv(p+'diag_has')==='있음');
+ }
+ setBlockEnabled(p+'pad_detail',rv(p+'pad')==='예');
+ ['b','l','d','s'].forEach(m=>{const sk=document.getElementById(p+'hr_'+m+'_skip');if(sk&&sk.checked)onMealSkip(mode,m);});
+ onTxNone(mode);
+ vCalcFISI(mode);vCalcWexner(mode);vCalcFIQOL(mode);
+}
+function saveVisit(mode,final){
+ const regId=document.getElementById('subjectId').value.trim();
+ const name=document.getElementById('visitName').value.trim();
+ if(!regId){toast('⚠️ 등록번호를 입력하세요');document.getElementById('subjectId').focus();return;}
+ // 재진: 새 기록이면 새 recId, 기존 편집 중이면 그 recId 유지
+ // 초진: 등록번호당 1건 (기존 있으면 덮어씀)
+ let recId=currentVisitRecId[mode];
+ if(!recId){
+  if(mode==='init'){
+   const exist=findVisitsByReg('init',regId);
+   recId=exist.length?exist[0]._recId:('I'+Date.now());
+  } else {
+   recId='F'+Date.now(); // 재진은 항상 새 기록 (여러 번 가능)
+  }
+ }
+ const prev=getVisitRec(mode,recId);
+ const data=collectVisit(mode);
+ data['_recId']=recId;data['_regId']=regId;data['_visitName']=name;data['_visitType']=mode;
+ // 설문 작성일: 24HR 날짜가 있으면 그걸, 없으면 오늘
+ const hrDate=document.getElementById(mode+'_hr_date')?document.getElementById(mode+'_hr_date').value:'';
+ data['_createdAt']=prev&&prev._createdAt?prev._createdAt:nowStr();
+ data['_visitDate']=hrDate||(prev&&prev._visitDate?prev._visitDate:new Date().toISOString().slice(0,10));
+ data['_savedAt']=nowStr();
+ data['_subjectId']=regId; // CSV 호환
+ try{localStorage.setItem(visitKey(mode,recId),JSON.stringify(data));}catch(e){toast('❌ 저장 실패: 저장공간 부족');return;}
+ const idx=getVisitIdx(mode);if(!idx.includes(recId)){idx.push(recId);setVisitIdx(mode,idx);}
+ currentVisitRecId[mode]=recId;dirty=false;
+ cloudUpsert(data).then(ok=>{setCloudStatus();if(!ok&&!final)toast('⚠️ 로컬 저장됨 (공용 저장소 연결 실패)');});
+ if(!final)toast('💾 임시 저장 완료 ('+regId+(name?' · '+name:'')+')');
+}
+
+/* ---- 모드 전환 ---- */
+let currentMode='crf';
+function switchMode(mode){
+ if(dirty&&!confirm('저장하지 않은 변경사항이 있을 수 있습니다. 모드를 전환할까요?')){return;}
+ currentMode=mode;
+ ['crf','init','fu'].forEach(m=>{
+  document.getElementById('ms-'+m).classList.toggle('active',m===mode);
+  const v=document.getElementById('view-'+m);if(v)v.classList.toggle('active',m===mode);
+  const ng=document.getElementById('nav-'+m+'-group');if(ng)ng.style.display=(m===mode)?'block':'none';
+ });
+ // 식별자 블록 전환
+ document.getElementById('idblock-crf').style.display=(mode==='crf')?'block':'none';
+ document.getElementById('idblock-visit').style.display=(mode==='crf')?'none':'block';
+ // 최종제출 버튼은 CRF에서만
+ document.getElementById('btn-final').style.display=(mode==='crf')?'block':'none';
+ const titles={crf:['대변실금 연구<br>CRF 입력 시스템','Fecal Incontinence Study'],init:['외래 방문 설문<br>초진용','대변실금 클리닉'],fu:['외래 방문 설문<br>재진용','대변실금 클리닉']};
+ document.getElementById('sbTitle').innerHTML=titles[mode][0];
+ document.getElementById('sbSub').textContent=titles[mode][1];
+ if(mode==='init')goV('init','demo');
+ else if(mode==='fu')goV('fu','fisi');
+ dirty=false;
+}
+
+/* ---- ① 그냥 입력하기: 등록번호·이름으로 작성 시작 (CRF 연동 안 함) ---- */
+function startVisitEntry(){
+ const regId=document.getElementById('subjectId').value.trim();
+ const mode=currentMode;if(mode==='crf')return;
+ if(!regId){toast('⚠️ 등록번호를 입력하세요');document.getElementById('subjectId').focus();return;}
+ // 같은 등록번호로 저장된 기존 기록이 있으면 안내
+ const ex=findVisitsByReg(mode,regId);
+ if(mode==='init'&&ex.length){
+  if(confirm('이 등록번호로 저장된 초진 기록이 있습니다.\n불러와서 이어서 작성할까요?\n(취소 시 새로 작성)')){
+   currentVisitRecId.init=ex[0]._recId;applyVisit('init',ex[0]);
+   if(!document.getElementById('visitName').value)document.getElementById('visitName').value=ex[0]._visitName||'';
+   toast('📂 기존 초진 응답을 불러왔습니다');return;
+  }
+ }
+ if(mode==='fu'&&ex.length){
+  toast('ℹ️ 이 등록번호로 재진 '+ex.length+'건이 있습니다 — 새 회차로 작성합니다 (기존은 응답 관리에서 수정)');
+ }
+ // 새 작성: 현재 기록 id 비우고 화면은 그대로(이미 입력한 값 유지)
+ currentVisitRecId[mode]=null;
+ toast('✍️ '+(mode==='init'?'초진':'재진')+' 작성 시작 — 저장/제출 시 등록번호로 저장됩니다');
+}
+
+/* ---- ② 연동(가져오기): CRF에서 공통 항목을 현재 설문으로 ---- */
+function pullFromCRF(){
+ const regId=document.getElementById('subjectId').value.trim();
+ const mode=currentMode;if(mode==='crf')return;
+ if(!regId){toast('⚠️ 먼저 등록번호를 입력하세요');document.getElementById('subjectId').focus();return;}
+ const crf=findCrfByReg(regId);
+ if(!crf){toast('🔍 이 등록번호로 저장된 CRF가 없습니다');return;}
+ linkFromCRF(mode,regId);
+ toast('📥 CRF에서 공통 항목(인구통계·FISI·Wexner·FIQOL 등)을 가져왔습니다');
+}
+
+/* 공통 항목 키 매핑 */
+const LINK_FIELDS={
+ radios:[
+  ['sex','gender'],['marry','married'],['spouse','spouse'],['edu','edu'],
+  ['fisi_gas','fisi_gas'],['fisi_mucus','fisi_mucus'],['fisi_loose','fisi_loose'],['fisi_solid','fisi_solid'],
+  ['wex1','wex1'],['wex2','wex2'],['wex3','wex3'],['wex4','wex4'],['wex5','wex5'],
+  ['bowel_freq','bowel_freq'],['bristol','bristol']
+ ],
+ inputs:[['sido','demo_sido'],['gu','demo_gu'],['age','demo_age'],['family_cnt','family_cnt']]
+};
+// CRF→방문 연동 (방문 화면에 CRF 공통값 채움) : CRF는 등록번호(_regId)로 찾음
+function findCrfByReg(regId){
+ const idx=getIndex();
+ for(const sid of idx){const r=crfMeta(sid);if(r&&r._regId===regId)return r;}
+ return null;
+}
+function linkFromCRF(mode,regId){
+ const crf=findCrfByReg(regId);if(!crf)return;
+ let any=false;const p=mode+'_';
+ LINK_FIELDS.radios.forEach(([vk,ck])=>{const val=crf['r:'+ck];if(val){const el=document.querySelector(`#view-${mode} input[name="${p}${vk}"][value="${CSS.escape(val)}"]`);if(el){el.checked=true;any=true;}}});
+ LINK_FIELDS.inputs.forEach(([vk,ck])=>{const val=crf['i:'+ck];if(val!=null&&val!==''){const el=document.getElementById(p+vk);if(el){el.value=val;any=true;}}});
+ for(let i=1;i<=27;i++){const val=crf['r:fq'+i];if(val){const el=document.querySelector(`#view-${mode} input[name="${p}fq${i}"][value="${val}"]`);if(el){el.checked=true;any=true;}}}
+ if(any){vCalcFISI(mode);vCalcWexner(mode);vCalcFIQOL(mode);showLinkBanner(mode,'CRF');}
+}
+// 방문→CRF 연동 (CRF 화면에 방문 공통값 채움)
+function applyVisitToCRF(rec){
+ const mode=rec._visitType;const p=mode+'_';let any=false;
+ LINK_FIELDS.radios.forEach(([vk,ck])=>{const val=rec['r:'+p+vk];if(val){const el=document.querySelector(`#view-crf input[name="${ck}"][value="${CSS.escape(val)}"]`);if(el){el.checked=true;any=true;}}});
+ LINK_FIELDS.inputs.forEach(([vk,ck])=>{const val=rec['i:'+p+vk];if(val!=null&&val!==''){const el=document.getElementById(ck);if(el){el.value=val;any=true;}}});
+ for(let i=1;i<=27;i++){const val=rec['r:'+p+'fq'+i];if(val){const el=document.querySelector(`#view-crf input[name="fq${i}"][value="${val}"]`);if(el){el.checked=true;any=true;}}}
+ // 등록번호도 CRF에 채움
+ if(rec._regId){document.getElementById('crf_regId').value=rec._regId;}
+ if(any){recalcAll();showCRFLinkBanner(rec);}
+ return any;
+}
+function showLinkBanner(mode,from){
+ const pg=document.getElementById(mode+'-'+(mode==='init'?'demo':'fisi'));
+ if(pg&&!pg.querySelector('.link-banner')){
+  const b=document.createElement('div');b.className='link-banner';
+  b.innerHTML='🔗 동일 등록번호의 '+from+'에서 공통 항목(인구통계·FISI·Wexner·FIQOL 등)을 자동으로 불러왔습니다.';
+  pg.insertBefore(b,pg.children[1]);
+ }
+}
+function showCRFLinkBanner(rec){
+ const s1=document.getElementById('s1');
+ if(s1){const old=s1.querySelector('.link-banner');if(old)old.remove();
+  const b=document.createElement('div');b.className='link-banner';
+  b.innerHTML=`🔗 ${rec._visitType==='init'?'초진':'재진'} 설문(${rec._visitName||rec._regId}${rec._visitDate?' · '+rec._visitDate:''})에서 공통 항목을 자동으로 불러왔습니다.`;
+  s1.insertBefore(b,s1.children[1]);
+ }
+}
+
+/* ---- 방문에서 "CRF로 연동하기" 버튼 ---- */
+function linkVisitToCRF(){
+ const regId=document.getElementById('subjectId').value.trim();
+ if(!regId){toast('⚠️ 먼저 등록번호를 입력하세요');return;}
+ // 현재 화면을 임시 저장하고 CRF로 전환 후 연동
+ saveVisit(currentMode,false);
+ const rec=getVisitRec(currentMode,currentVisitRecId[currentMode]);
+ switchMode('crf');
+ if(rec&&applyVisitToCRF(rec))toast('🔗 CRF로 공통 항목 연동 완료 — 나머지 항목을 입력하세요');
+ else toast('연동할 공통 항목이 없습니다');
+}
+
+/* ---- CRF에서 "등록번호 검색·연동" 모달 ---- */
+function openSearch(){document.getElementById('searchReg').value=document.getElementById('crf_regId').value.trim();document.getElementById('searchResult').innerHTML='';document.getElementById('searchModal').classList.add('open');if(document.getElementById('searchReg').value)runSearch();}
+function closeSearch(){document.getElementById('searchModal').classList.remove('open');}
+function runSearch(){
+ const regId=document.getElementById('searchReg').value.trim();
+ const box=document.getElementById('searchResult');
+ if(!regId){box.innerHTML='<div style="color:#718096;padding:10px">등록번호를 입력하세요.</div>';return;}
+ const inits=findVisitsByReg('init',regId),fus=findVisitsByReg('fu',regId);
+ if(!inits.length&&!fus.length){box.innerHTML=`<div style="color:#991b1b;padding:14px;background:#fee2e2;border-radius:8px">등록번호 [${regId}] 로 저장된 초진·재진 설문이 없습니다.</div>`;return;}
+ let html='';
+ if(inits.length){
+  html+='<div style="font-size:12px;font-weight:700;color:#1e40af;margin:8px 0 6px">🩺 초진</div>';
+  html+=inits.map(r=>`<div class="search-row"><span class="sr-type sr-init">초진</span><span style="flex:1">${r._visitName||'(이름 없음)'} · <span class="col-date">${r._visitDate||r._createdAt}</span></span><button class="btn btn-pri btn-sm" onclick="pickVisitForCRF('init','${r._recId}')">CRF로 연동</button></div>`).join('');
+ }
+ if(fus.length){
+  html+='<div style="font-size:12px;font-weight:700;color:#9d174d;margin:12px 0 6px">🔁 재진 ('+fus.length+'건 — 작성 날짜를 선택)</div>';
+  html+=fus.map(r=>`<div class="search-row"><span class="sr-type sr-fu">재진</span><span style="flex:1">${r._visitName||'(이름 없음)'} · <span class="col-date">${r._visitDate||r._createdAt}</span> <span style="color:#a0aec0;font-size:11px">(저장 ${r._savedAt||''})</span></span><button class="btn btn-pri btn-sm" onclick="pickVisitForCRF('fu','${r._recId}')">CRF로 연동</button></div>`).join('');
+ }
+ box.innerHTML=html;
+}
+function pickVisitForCRF(mode,recId){
+ const rec=getVisitRec(mode,recId);if(!rec){toast('기록을 찾을 수 없습니다');return;}
+ closeSearch();
+ if(applyVisitToCRF(rec)){go('s1');toast('🔗 '+(mode==='init'?'초진':'재진')+' 설문에서 CRF로 연동 완료');}
+ else toast('연동할 공통 항목이 없습니다');
+}
+
+/* ---- 방문 설문 이벤트 위임 (점수 자동 계산) ---- */
+document.addEventListener('change',e=>{
+ const n=e.target.name||'';
+ ['init','fu'].forEach(mode=>{
+  const p=mode+'_';
+  if(n.startsWith(p+'fisi_'))vCalcFISI(mode);
+  else if(new RegExp('^'+p+'wex\\d').test(n))vCalcWexner(mode);
+  else if(new RegExp('^'+p+'fq').test(n))vCalcFIQOL(mode);
+ });
+});
+
+/* ---- 초기화 ---- */
+function initVisitModules(){
+ buildVisitView('init');
+ buildVisitView('fu');
+ wireConditionals('init');
+}
+
+/* ---- 모드별 디스패처 (사이드바 푸터) ---- */
+function smartSave(){
+ if(currentMode==='crf')saveData();
+ else saveVisit(currentMode,false);
+}
+function smartExport(){
+ // Excel 추출: 현재 모드의 전체 환자 추출
+ if(currentMode==='crf'){exportAllCSV();return;}
+ exportAllVisit(currentMode);
+}
+function smartClear(){
+ if(currentMode==='crf'){clearForm();return;}
+ if(!confirm('현재 '+(currentMode==='init'?'초진':'재진')+' 입력을 모두 초기화할까요?'))return;
+ document.querySelectorAll('#view-'+currentMode+' input, #view-'+currentMode+' select, #view-'+currentMode+' textarea').forEach(el=>{
+  if(el.type==='radio'||el.type==='checkbox')el.checked=false;else el.value='';el.disabled=false;
+ });
+ document.getElementById('subjectId').value='';document.getElementById('visitName').value='';
+ currentVisitRecId[currentMode]=null;
+ wireConditionals(currentMode);
+ vCalcFISI(currentMode);vCalcWexner(currentMode);vCalcFIQOL(currentMode);
+ dirty=false;toast('🔄 초기화 완료');
+}
+function exportAllVisit(mode){
+ const idx=getVisitIdx(mode);if(!idx.length){toast('⚠️ 저장된 '+(mode==='init'?'초진':'재진')+' 응답이 없습니다');return;}
+ const records=idx.map(id=>getVisitRec(mode,id)).filter(Boolean);
+ downloadCSV(buildCSV(records),`${mode==='init'?'초진':'재진'}_전체${records.length}건_${new Date().toISOString().slice(0,10)}.csv`);
+ toast(`📥 ${mode==='init'?'초진':'재진'} 전체 ${records.length}건 추출 완료`);
+}
+function loadVisitFromMgr(mode,recId){
+ if(currentMode!==mode)switchMode(mode);
+ const rec=getVisitRec(mode,recId);if(!rec)return;
+ currentVisitRecId[mode]=recId;
+ document.getElementById('subjectId').value=rec._regId||'';
+ document.getElementById('visitName').value=rec._visitName||'';
+ applyVisit(mode,rec);
+ closeMgr();toast('📂 '+(mode==='init'?'초진':'재진')+' 불러오기 완료');
+}
+function deleteVisit(mode,recId){
+ if(!confirm(`이 ${mode==='init'?'초진':'재진'} 응답을 삭제할까요?`))return;
+ localStorage.removeItem(visitKey(mode,recId));setVisitIdx(mode,getVisitIdx(mode).filter(x=>x!==recId));
+ cloudDelete(mode,recId);
+ renderRecList();toast('🗑️ 삭제 완료');
+}
+
+/* ---- 데이터 시트 (구글시트 형태) ---- */
+let sheetMode='crf';
+function openSheet(){document.getElementById('sheetModal').classList.add('open');refreshSheetFromCloud();}
+function closeSheet(){document.getElementById('sheetModal').classList.remove('open');}
+async function refreshSheetFromCloud(){
+ const tbl=document.getElementById('sheetTbl');
+ if(tbl)tbl.innerHTML='<tr><td style="padding:20px;color:#718096">⏳ 공용 저장소에서 불러오는 중…</td></tr>';
+ await cloudPullAll();setCloudStatus();
+ renderSheet(sheetMode||'crf');
+}
+function getAllRecords(mode){
+ if(mode==='crf')return getIndex().map(id=>crfMeta(id)).filter(Boolean);
+ return getVisitIdx(mode).map(id=>getVisitRec(mode,id)).filter(Boolean);
+}
+/* 키 → 사람이 읽을 라벨 */
+function sheetColLabel(k){
+ const meta={'_createdAt':'최초작성일','_lastModifiedAt':'최종수정일','_savedAt':'저장일시','_visitDate':'설문작성일','_studyId':'연구번호','_regId':'등록번호','_visitName':'이름','_subjectId':'식별번호','_status':'상태','_visitType':'설문종류','_amendments':'수정이력'};
+ if(meta[k])return meta[k];
+ let s=k.replace(/^[irc]:/,'').replace(/^(init_|fu_)/,'');
+ const dict={'demo_sido':'거주-시도','demo_gu':'거주-구','demo_age':'나이','gender':'성별','sex':'성별','married':'결혼','marry':'결혼','spouse':'배우자관계','edu':'학력','family_cnt':'동거가족수',
+  'fisi_gas':'FISI-가스','fisi_mucus':'FISI-점액','fisi_loose':'FISI-설사변','fisi_solid':'FISI-고형변','fisiScore':'FISI총점',
+  'wex1':'Wexner-고형','wex2':'Wexner-액체','wex3':'Wexner-가스','wex4':'Wexner-패드','wex5':'Wexner-생활방해','wexnerScore':'Wexner총점',
+  'bowel_freq':'배변빈도','bristol':'대변굳기','fiqolScore':'FIQOL총점','fiqolAvg':'FIQOL평균',
+  'adlScore':'ADL총점','mmseScore':'MMSE총점','gdsScore':'GDS총점','kfesScore':'KFES총점'};
+ if(dict[s])return dict[s];
+ // fq1..fq27 / diag / hr 등 패턴
+ let m;
+ if(m=s.match(/^fq(\d+)$/))return 'FIQOL'+m[1];
+ if(m=s.match(/^fq_h(\d+)$/))return 'FIQOL건강'+m[1];
+ if(m=s.match(/^diag(\d+)_dx$/))return '진단'+m[1]+'-여부';
+ if(m=s.match(/^diag(\d+)_tx$/))return '진단'+m[1]+'-치료';
+ if(m=s.match(/^diag(\d+)_when$/))return '진단'+m[1]+'-시기';
+ return s;
+}
+/* 전체 문항을 보여주는 엑셀시트 형식 */
+let sheetSearchTerm='';
+function renderSheet(mode){
+ sheetMode=mode;
+ ['crf','init','fu'].forEach(m=>{const t=document.getElementById('stab-'+m);if(t)t.classList.toggle('active',m===mode);});
+ let recs=getAllRecords(mode);
+ const tbl=document.getElementById('sheetTbl'),empty=document.getElementById('sheetEmpty');
+ // 검색 필터 (이름/등록번호/연구번호)
+ if(sheetSearchTerm){
+  const q=sheetSearchTerm.toLowerCase();
+  recs=recs.filter(r=>[r._visitName,r._regId,r._studyId,r._subjectId].some(v=>(v||'').toLowerCase().includes(q)));
+ }
+ if(!recs.length){tbl.innerHTML='';empty.style.display='block';empty.textContent=sheetSearchTerm?'검색 결과가 없습니다.':'저장된 응답이 없습니다.';updateSheetCount(0);return;}
+ empty.style.display='none';
+ // 전체 컬럼 수집: 메타(앞) + 모든 데이터 키(합집합)
+ const FRONT=mode==='crf'
+  ?['_createdAt','_lastModifiedAt','_status','_studyId','_regId']
+  :['_visitDate','_createdAt','_visitName','_regId'];
+ const dataKeys=new Set();
+ recs.forEach(r=>Object.keys(r).forEach(k=>{if(!k.startsWith('_')||k==='_status')dataKeys.add(k);}));
+ // 정렬: i:/r:/c: 키를 원래 입력 순서 비슷하게 (이름 기준 정렬)
+ const cols=[...FRONT.filter(k=>recs.some(r=>k in r)), ...[...dataKeys].filter(k=>!FRONT.includes(k)).sort()];
+ // 최신순 (작성일 내림차순)
+ recs.sort((a,b)=>(b._createdAt||b._visitDate||'').localeCompare(a._createdAt||a._visitDate||''));
+ const fmtVal=(r,k)=>{
+  let v=r[k];if(v==null)v='';
+  if(k==='_status')return v==='final'?'<span class="status-badge status-final">최종</span>':'<span class="status-badge status-draft">작성중</span>';
+  if(k==='_amendments'&&Array.isArray(v))return v.map(a=>`${a.at}:${a.reason}(${a.by})`).join(' / ');
+  if(typeof v==='object')v=JSON.stringify(v);
+  return String(v).replace(/</g,'&lt;');
+ };
+ const isDate=k=>k.includes('createdAt')||k.includes('ModifiedAt')||k.includes('visitDate')||k.includes('savedAt');
+ let head='<tr><th>#</th>'+cols.map(k=>`<th>${sheetColLabel(k)}</th>`).join('')+'</tr>';
+ let body=recs.map((r,i)=>{
+  const cells=cols.map(k=>`<td${isDate(k)?' class="col-date"':''}>${fmtVal(r,k)}</td>`).join('');
+  return `<tr><td>${i+1}</td>${cells}</tr>`;
+ }).join('');
+ tbl.innerHTML=head+body;
+ updateSheetCount(recs.length,cols.length);
+}
+function updateSheetCount(rows,cols){
+ const el=document.getElementById('sheetCount');if(el)el.textContent=rows?`${rows}명 · ${cols}개 항목`:'';
+}
+function onSheetSearch(v){sheetSearchTerm=v.trim();renderSheet(sheetMode);}
+function exportCurrentSheet(){
+ if(sheetMode==='crf')exportAllCSV();else exportAllVisit(sheetMode);
+}
+
+
+document.addEventListener('input',()=>{dirty=true});
+renderTables();
+recalcAll();
+initVisitModules();
+// 초기 상태: CRF 모드 식별자 블록 + 빈 메타 배너
+updateCrfMetaBanner(null);
+document.getElementById('idblock-crf').style.display='block';
+document.getElementById('idblock-visit').style.display='none';
+document.getElementById('btn-final').style.display='block';
+// 앱 시작 시 공용 저장소에서 전체 데이터 동기화 (모든 사용자가 같은 데이터를 봄)
+cloudPullAll().then(ok=>{setCloudStatus();if(ok)toast('☁️ 공용 저장소에서 최신 데이터를 불러왔습니다');else toast('⚠️ 공용 저장소 연결 실패 — 로컬 모드로 동작합니다');});
+// 주기적 동기화 (60초마다 최신 데이터 반영)
+setInterval(()=>{if(!dirty&&!document.getElementById('sheetModal').classList.contains('open'))cloudPullAll().then(setCloudStatus);},60000);
+</script>
+</body>
+</html>
